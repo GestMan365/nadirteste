@@ -4,27 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GestMan365</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #071a3e;
-      --panel: #102247;
-      --panel-2: #153064;
-      --line: #315184;
-      --line-soft: #193762;
-      --text: #d8d8d8;
-      --muted: #b7c7e7;
-      --green: #123f8d;
-      --green-2: #ffffff;
-      --green-soft: #0d3479;
-      --cyan: #03a9f4;
+      --blue-900: #071a3e;
+      --blue-800: #0d2f73;
+      --blue-700: #123f8d;
       --orange: #ff8a4c;
-      --red: #e52626;
-      --blue-gray: #8fb8c9;
-      --brand-blue: #123f8d;
-      --brand-blue-2: #0d2f73;
-      --brand-orange: #ff8a4c;
-      --brand-white: #ffffff;
+      --white: #ffffff;
+      --ink: #e8eefc;
+      --muted: #aebfdf;
+      --panel: rgba(8, 23, 52, .88);
+      --panel-2: rgba(255, 255, 255, .08);
+      --line: rgba(255, 255, 255, .2);
+      --danger: #ff5c6c;
+      --ok: #4ade80;
+      --warn: #facc15;
+      --shadow: 0 18px 46px rgba(0, 0, 0, .34);
     }
 
     * { box-sizing: border-box; }
@@ -33,10 +28,10 @@
       margin: 0;
       min-height: 100vh;
       background:
-        radial-gradient(circle at 14% 12%, rgba(255,138,76,.16), transparent 26%),
-        radial-gradient(circle at 82% 18%, rgba(255,255,255,.10), transparent 24%),
-        linear-gradient(135deg, #071a3e 0%, #0d2f73 42%, #123f8d 100%);
-      color: var(--text);
+        radial-gradient(circle at 12% 10%, rgba(255, 138, 76, .18), transparent 26%),
+        radial-gradient(circle at 88% 0%, rgba(255, 255, 255, .12), transparent 26%),
+        linear-gradient(135deg, var(--blue-900), var(--blue-800) 44%, var(--blue-700));
+      color: var(--ink);
       font-family: Arial, Helvetica, sans-serif;
       font-size: 13px;
       overflow: hidden;
@@ -44,1829 +39,603 @@
 
     button, input, select, textarea { font: inherit; }
 
+    button {
+      cursor: pointer;
+    }
+
     .topbar {
-      height: 58px;
-      background: linear-gradient(90deg, #0b2558, #123f8d 58%, #0d2f73);
-      border-bottom: 1px solid rgba(255,255,255,.12);
+      height: 62px;
+      background: linear-gradient(90deg, #0b2558, var(--blue-700), #0d2f73);
+      border-bottom: 1px solid rgba(255,255,255,.16);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 18px 0 44px;
-      box-shadow: 0 8px 22px rgba(0,0,0,.35);
+      padding: 0 20px;
+      box-shadow: 0 10px 28px rgba(0,0,0,.3);
     }
 
     .brand {
       display: grid;
-      grid-template-columns: 42px auto;
-      align-items: center;
+      grid-template-columns: 44px auto;
       gap: 10px;
-      line-height: 1;
+      align-items: center;
     }
 
     .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: #ffffff;
-      color: var(--brand-blue);
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      background: var(--white);
+      color: var(--blue-700);
       display: grid;
       place-items: center;
       position: relative;
-      box-shadow: 0 0 0 3px rgba(255,255,255,.14), 0 8px 18px rgba(0,0,0,.28);
-      overflow: hidden;
-      animation: logoFloat 4.5s ease-in-out infinite;
+      box-shadow: 0 0 0 3px rgba(255,255,255,.12), 0 8px 18px rgba(0,0,0,.28);
+      animation: floatLogo 4.5s ease-in-out infinite;
     }
 
     .brand-mark::after {
       content: "";
       position: absolute;
-      right: 6px;
-      bottom: 6px;
+      right: 7px;
+      bottom: 7px;
       width: 9px;
       height: 9px;
       border-radius: 50%;
-      background: var(--brand-orange);
-      box-shadow: 0 0 14px rgba(255,138,76,.75);
+      background: var(--orange);
+      box-shadow: 0 0 16px rgba(255,138,76,.8);
     }
 
     .brand-mark svg {
-      width: 28px;
-      height: 28px;
-      transform-origin: 50% 50%;
-      animation: wrenchTurn 3.8s ease-in-out infinite;
+      width: 29px;
+      height: 29px;
+      animation: wrenchTurn 3.7s ease-in-out infinite;
     }
 
     .brand-name {
       font-size: 29px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: -1px;
-      color: #f3f3f3;
-      text-shadow: 0 3px 16px rgba(0,0,0,.22);
+      line-height: .95;
     }
 
-    .brand-name span { color: var(--brand-orange); }
+    .brand-name span { color: var(--orange); }
 
     .brand-sub {
-      margin-left: 96px;
-      margin-top: -5px;
+      color: rgba(255,255,255,.78);
       font-size: 11px;
-      color: rgba(255,255,255,.86);
       letter-spacing: .7px;
+      margin-top: 3px;
     }
 
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
-      color: #ddd;
-      font-size: 22px;
+      gap: 10px;
     }
 
-    .top-icon {
-      position: relative;
-      width: 26px;
-      height: 26px;
-      display: grid;
-      place-items: center;
-      color: #d7d7d7;
-      filter: drop-shadow(0 1px 1px rgba(0,0,0,.6));
-    }
-
-    .badge {
-      position: absolute;
-      right: -7px;
-      top: -9px;
-      min-width: 15px;
-      height: 15px;
-      padding: 0 4px;
-      border-radius: 999px;
-      background: var(--red);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      display: grid;
-      place-items: center;
-    }
-
-    .avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: 2px solid #ddd;
-      background:
-        radial-gradient(circle at 70% 32%, #ff8b24 0 10%, transparent 11%),
-        radial-gradient(circle at 35% 60%, #7a2f0f 0 20%, transparent 21%),
-        linear-gradient(135deg, #21324c, #181818);
-    }
-
-    .toolbar {
-      height: 68px;
-      background: rgba(5, 18, 43, .86);
-      border-bottom: 1px solid rgba(255,255,255,.12);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 18px 10px 4px;
-    }
-
-    .filters {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .search {
-      position: relative;
-    }
-
-    .search input,
-    select {
-      height: 32px;
+    .admin-pill {
+      height: 28px;
       border: 1px solid rgba(255,255,255,.25);
-      background: rgba(255,255,255,.08);
+      background: rgba(255,255,255,.09);
+      border-radius: 999px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 700;
       color: #fff;
-      border-radius: 3px;
-      padding: 0 34px 0 6px;
-      min-width: 162px;
-      outline: none;
     }
 
-    .search::after {
-      content: "";
-      position: absolute;
-      right: 8px;
-      top: 6px;
-      width: 16px;
-      height: 16px;
-      border: 3px solid #8f8f8f;
-      border-radius: 50%;
-      box-shadow: 8px 8px 0 -6px #8f8f8f;
-      transform: rotate(45deg);
+    .nav {
+      height: 52px;
+      background: rgba(5, 18, 43, .86);
+      border-bottom: 1px solid rgba(255,255,255,.14);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
     }
 
-    .select-wrap {
-      position: relative;
-      display: grid;
-      gap: 1px;
-    }
-
-    .select-wrap label {
-      position: absolute;
-      top: -6px;
-      left: 8px;
-      background: #071a3e;
-      color: #d5def3;
-      font-size: 10px;
-      padding: 0 3px;
-    }
-
-    .tool-buttons {
+    .tabs {
       display: flex;
       gap: 8px;
       align-items: center;
+      overflow-x: auto;
     }
 
-    .square-btn {
-      width: 25px;
-      height: 25px;
+    .tab {
+      height: 32px;
       border: 1px solid rgba(255,255,255,.22);
-      border-radius: 3px;
+      border-radius: 5px;
       background: rgba(255,255,255,.08);
-      color: var(--brand-white);
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+      color: var(--ink);
+      padding: 0 11px;
+      white-space: nowrap;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
     }
 
-    .square-btn.orange { color: var(--orange); }
+    .tab:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,138,76,.7);
+      background: rgba(255,138,76,.14);
+    }
 
-    .square-btn:hover {
-      transform: translateY(-2px) scale(1.04);
-      background: rgba(255,138,76,.18);
-      box-shadow: 0 0 16px rgba(255,138,76,.26);
+    .tab.active {
+      background: var(--orange);
+      color: #061536;
+      border-color: var(--orange);
+      font-weight: 800;
+    }
+
+    .searchbar {
+      width: min(360px, 36vw);
+      height: 32px;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 5px;
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      padding: 0 10px;
     }
 
     .workspace {
-      height: calc(100vh - 118px);
+      height: calc(100vh - 114px);
       overflow: auto;
-      padding: 10px 22px 18px 24px;
-      background:
-        linear-gradient(180deg, rgba(7,26,62,.72), rgba(4,13,31,.94)),
-        radial-gradient(circle at 50% 0%, rgba(255,255,255,.08), transparent 34%);
+      padding: 16px;
     }
 
-    .unit {
-      min-width: 1180px;
-      border-left: 1px solid #595959;
-    }
+    .view { display: none; }
+    .view.active { display: block; }
 
-    .unit-head {
-      height: 32px;
-      border: 1px solid rgba(255,255,255,.22);
-      background: rgba(7,26,62,.72);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 9px 0 0;
-      color: #ddd;
-      font-size: 15px;
-      margin-bottom: 10px;
-    }
+    .grid { display: grid; gap: 14px; }
+    .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .two-col { grid-template-columns: minmax(0, 1.25fr) minmax(360px, .75fr); align-items: start; }
+    .admin-grid { grid-template-columns: 410px minmax(0, 1fr); align-items: start; }
 
-    .drag-dots {
-      width: 12px;
-      align-self: stretch;
-      background-image: radial-gradient(#777 1px, transparent 1.5px);
-      background-size: 4px 5px;
-      opacity: .85;
-    }
-
-    .collapse {
-      width: 24px;
-      height: 24px;
-      border: 1px solid #777;
-      border-radius: 3px;
-      display: grid;
-      place-items: center;
-      color: #aaa;
-      font-size: 19px;
-    }
-
-    .line-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px 9px;
-      padding-left: 0;
-    }
-
-    .line-card {
-      border: 1px solid rgba(255,255,255,.22);
-      border-radius: 4px;
-      background: rgba(8, 23, 52, .86);
+    .panel, .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
       overflow: hidden;
-      min-height: 142px;
+    }
+
+    .metric {
+      min-height: 116px;
+      padding: 16px;
       position: relative;
-      box-shadow: 0 8px 20px rgba(0,0,0,.22);
-      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
-    .line-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(255,138,76,.62);
-      box-shadow: 0 14px 30px rgba(0,0,0,.34), 0 0 22px rgba(255,138,76,.12);
-    }
-
-    .line-card.compact { min-height: 142px; }
-
-    .line-header {
-      height: 34px;
-      background: linear-gradient(90deg, #0c347d, #123f8d 62%, #0f357d);
-      border-bottom: 1px solid rgba(255,255,255,.16);
-      color: #ffffff;
-      display: grid;
-      grid-template-columns: 44px minmax(0, 1fr) 34px;
-      align-items: center;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 700;
-      text-shadow: 0 1px 1px rgba(0,0,0,.45);
-    }
-
-    .pin-icon {
-      width: 24px;
-      height: 24px;
-      margin-left: 16px;
-      border: 1px solid rgba(255,255,255,.55);
-      border-radius: 3px;
-      display: grid;
-      place-items: center;
-      color: #ffffff;
-      font-size: 17px;
-    }
-
-    .map-icon {
-      position: relative;
-      width: 22px;
-      height: 22px;
-      border: 2px solid #fff;
-      border-radius: 3px;
-      background:
-        linear-gradient(135deg, #ffffff 0 34%, #ffcf9d 35% 55%, #ff8a4c 56% 100%);
-      margin-left: 4px;
-    }
-
-    .alert-dot {
+    .metric::after {
+      content: "";
       position: absolute;
-      right: -9px;
-      top: -9px;
-      min-width: 17px;
-      height: 17px;
-      border-radius: 999px;
-      background: var(--cyan);
-      color: #061016;
-      display: grid;
-      place-items: center;
-      font-size: 11px;
+      right: 14px;
+      top: 14px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 18px rgba(255,138,76,.8);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
       font-weight: 800;
     }
 
-    .line-body {
-      margin: 0 6px 8px 12px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-top: 0;
-      border-radius: 0 0 4px 4px;
-      min-height: 104px;
-      position: relative;
-      padding: 9px 12px 8px 24px;
+    .metric strong {
+      display: block;
+      font-size: 31px;
+      margin-top: 12px;
+      line-height: 1;
     }
 
-    .line-body::before {
-      content: "";
-      position: absolute;
-      left: -8px;
-      top: 0;
-      bottom: 0;
-      width: 8px;
-      background-image: radial-gradient(#777 1px, transparent 1.5px);
-      background-size: 4px 5px;
+    .metric small {
+      display: block;
+      color: var(--muted);
+      margin-top: 8px;
     }
 
-    .line-code {
-      text-align: center;
-      color: #aaa;
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    .line-type {
-      text-align: center;
-      color: #9e9e9e;
-      font-size: 10px;
-      font-weight: 700;
-      margin: 6px 0 12px;
-    }
-
-    .machine-row {
+    .panel-head {
+      min-height: 48px;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
       display: flex;
-      align-items: end;
-      gap: 20px;
-      min-height: 46px;
-      overflow-x: auto;
-      padding-bottom: 2px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
 
-    .machine {
-      width: 58px;
-      flex: 0 0 58px;
+    .panel-title {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      height: 32px;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 5px;
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      padding: 0 11px;
+      transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(255,138,76,.18);
+      border-color: rgba(255,138,76,.7);
+    }
+
+    .btn.primary {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #071a3e;
+      font-weight: 800;
+    }
+
+    .btn.danger {
+      background: rgba(255,92,108,.18);
+      border-color: rgba(255,92,108,.55);
+      color: #ffd4d9;
+    }
+
+    .chart {
+      padding: 15px 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 128px minmax(0,1fr) 58px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .bar-track {
+      height: 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.1);
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ffffff, var(--orange));
+    }
+
+    .line-chart {
+      height: 220px;
+      padding: 14px;
+    }
+
+    .line-chart svg { width: 100%; height: 100%; display: block; }
+
+    .empty {
+      padding: 26px 14px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .map-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .industrial-map {
+      min-height: 610px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,.05) 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, rgba(255,138,76,.08), transparent 38%),
+        rgba(5, 18, 43, .76);
+      background-size: 32px 32px, 32px 32px, auto, auto;
       position: relative;
+      overflow: hidden;
+    }
+
+    .map-zone {
+      position: absolute;
+      border: 2px solid rgba(255,255,255,.34);
+      background: rgba(18,63,141,.22);
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: inset 0 0 30px rgba(255,255,255,.04);
+    }
+
+    .map-zone-title {
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .3px;
+    }
+
+    .machine-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 74px;
       display: grid;
       justify-items: center;
-      gap: 2px;
+      gap: 3px;
       border: 0;
       background: transparent;
+      color: #fff;
       padding: 0;
-      cursor: pointer;
     }
 
-    .machine::before {
-      content: "";
-      position: absolute;
-      left: -7px;
-      top: 3px;
-      bottom: 13px;
-      width: 6px;
-      background-image: radial-gradient(#777 1px, transparent 1.5px);
-      background-size: 4px 5px;
-    }
-
-    .machine-box {
-      width: 58px;
+    .machine-icon {
+      width: 54px;
       height: 42px;
-      border: 1px solid rgba(255,255,255,.35);
-      border-radius: 4px;
-      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.38);
+      border-radius: 6px;
+      background: rgba(255,255,255,.08);
       display: grid;
       place-items: center;
-      color: var(--brand-white);
+      font-weight: 900;
+      color: #fff;
       position: relative;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.35);
-      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
 
-    .machine:hover .machine-box {
-      transform: translateY(-3px) scale(1.06);
-      border-color: var(--brand-orange);
-      background: rgba(255,138,76,.10);
-      box-shadow: 0 0 18px rgba(255,138,76,.35), inset 0 0 0 1px rgba(255,255,255,.08);
-    }
-
-    .machine-name {
-      color: #b5b5b5;
-      font-size: 10px;
-      line-height: 1;
-      max-width: 62px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-align: center;
+    .machine-node:hover .machine-icon {
+      transform: translateY(-3px) scale(1.05);
+      border-color: var(--orange);
+      box-shadow: 0 0 22px rgba(255,138,76,.35);
     }
 
     .machine-alert {
       position: absolute;
       right: -7px;
       top: -8px;
-      width: 17px;
+      min-width: 17px;
       height: 17px;
-      border-radius: 50%;
-      background: var(--cyan);
-      color: #031016;
-      font-size: 11px;
-      font-weight: 800;
-      display: grid;
-      place-items: center;
-      z-index: 2;
-      animation: alertPulse 1.8s ease-in-out infinite;
-    }
-
-    .ico {
-      width: 34px;
-      height: 28px;
-      position: relative;
-    }
-
-    .ico-tank {
-      border: 2px solid var(--green-2);
-      border-radius: 5px 5px 10px 10px;
-      width: 18px;
-      height: 25px;
-      margin: 2px auto 0;
-    }
-
-    .ico-tank::before {
-      content: "";
-      position: absolute;
-      left: 14px;
-      top: -2px;
-      width: 7px;
-      height: 7px;
-      border: 2px solid var(--green-2);
-      border-bottom: 0;
-    }
-
-    .ico-me {
-      display: grid;
-      grid-template-columns: repeat(3, 8px);
-      gap: 2px;
-      justify-content: center;
-      padding-top: 4px;
-    }
-
-    .ico-me span {
-      height: 25px;
-      border: 2px solid var(--green-2);
       border-radius: 999px;
-      position: relative;
-    }
-
-    .ico-box {
-      width: 31px;
-      height: 22px;
-      margin: 4px auto;
-      border: 2px solid var(--green-2);
-      transform: skewY(-17deg);
-    }
-
-    .ico-funnel {
-      width: 32px;
-      height: 28px;
-      margin: 0 auto;
-      border: 2px solid var(--green-2);
-      border-top: 0;
-      clip-path: polygon(8% 0, 92% 0, 60% 60%, 60% 100%, 40% 100%, 40% 60%);
-      background: rgba(0,164,40,.08);
-    }
-
-    .ico-os {
-      width: 38px;
-      height: 38px;
-      border: 3px solid var(--green-2);
-      border-radius: 50%;
       display: grid;
       place-items: center;
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--green-2);
-    }
-
-    .ico-light {
-      width: 20px;
-      height: 20px;
-      margin: 4px auto;
-      background: var(--green-soft);
-      border-radius: 50%;
-      box-shadow: 0 0 14px rgba(0,164,40,.3);
-    }
-
-    .ico-light::after {
-      content: "";
-      position: absolute;
-      left: 16px;
-      top: 23px;
-      width: 2px;
-      height: 8px;
-      background: var(--green-2);
-    }
-
-    .ico-flow {
-      width: 40px;
-      height: 30px;
-      margin: 0 auto;
-      border-left: 6px solid var(--blue-gray);
-      border-right: 6px solid var(--blue-gray);
-      position: relative;
-    }
-
-    .ico-flow::before,
-    .ico-flow::after {
-      content: "";
-      position: absolute;
-      width: 14px;
-      height: 7px;
-      background: var(--blue-gray);
-      right: 0;
-    }
-
-    .ico-flow::before { top: 4px; }
-    .ico-flow::after { bottom: 4px; }
-
-    .details-panel {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      width: 360px;
-      max-width: calc(100vw - 32px);
-      background: #202020;
-      border: 1px solid #5b5b5b;
-      border-radius: 6px;
-      box-shadow: 0 14px 36px rgba(0,0,0,.45);
-      display: none;
-      z-index: 20;
-    }
-
-    .details-panel.open { display: block; }
-
-    .machine-menu {
-      position: fixed;
-      width: 238px;
-      background: #0d2f73;
-      border: 1px solid rgba(255,255,255,.26);
-      box-shadow: 0 12px 28px rgba(0,0,0,.52);
-      display: none;
-      z-index: 30;
-      padding: 6px 6px 6px 0;
-    }
-
-    .machine-menu.open { display: block; }
-
-    .machine-menu::before {
-      content: "";
-      position: absolute;
-      left: -8px;
-      top: 0;
-      bottom: 0;
-      width: 8px;
-      background-image: radial-gradient(#777 1px, transparent 1.5px);
-      background-size: 4px 5px;
-      background-color: #242424;
-    }
-
-    .menu-close {
-      position: absolute;
-      left: -13px;
-      top: 18px;
-      width: 14px;
-      height: 14px;
-      border: 1px solid #777;
-      border-radius: 2px;
-      background: #d8d8d8;
-      color: #333;
-      display: grid;
-      place-items: center;
+      background: #03a9f4;
+      color: #04111d;
       font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-      z-index: 2;
+      animation: pulse 1.8s ease-in-out infinite;
     }
 
-    .menu-item {
-      height: 34px;
-      border: 0;
-      border-bottom: 1px solid rgba(255,255,255,.20);
-      background: transparent;
-      color: #cfcfcf;
-      display: grid;
-      grid-template-columns: 34px minmax(0, 1fr);
-      align-items: center;
-      gap: 2px;
-      width: 100%;
-      text-align: left;
-      cursor: pointer;
-      padding: 0 6px;
-    }
-
-    .menu-item:last-child { border-bottom: 0; }
-    .menu-item:hover {
-      background: rgba(255,138,76,.18);
-      color: #fff;
-    }
-
-    .menu-ico {
-      width: 26px;
-      height: 26px;
-      display: grid;
-      place-items: center;
-      color: #e9e9e9;
-      font-size: 20px;
-      font-weight: 800;
-    }
-
-    .menu-ico.bot {
-      width: 24px;
-      height: 18px;
-      border-radius: 4px;
-      background: #eef6ff;
-      color: #0b69a3;
-      font-size: 9px;
-      border: 1px solid #7eb7d6;
-      margin-left: 2px;
-    }
-
-    .machine-tooltip {
-      position: fixed;
-      width: 216px;
-      background: #fbfbfb;
-      color: #333;
-      border-radius: 4px;
-      border: 1px solid #cfcfcf;
-      box-shadow: 0 4px 16px rgba(0,0,0,.42);
-      display: none;
-      z-index: 40;
-      padding: 8px 9px 10px;
-      font-size: 14px;
-      line-height: 1.28;
-      pointer-events: none;
-    }
-
-    .machine-tooltip.open { display: block; }
-
-    .machine-tooltip::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: -9px;
-      transform: translateX(-50%);
-      border-left: 9px solid transparent;
-      border-right: 9px solid transparent;
-      border-top: 9px solid #fbfbfb;
-      filter: drop-shadow(0 2px 1px rgba(0,0,0,.18));
-    }
-
-    .tooltip-head {
-      display: grid;
-      grid-template-columns: 26px minmax(0, 1fr);
-      gap: 8px;
-      align-items: center;
-      min-height: 25px;
-    }
-
-    .tooltip-head + .tooltip-head { margin-top: 3px; }
-
-    .tooltip-mini {
-      width: 24px;
-      height: 24px;
-      border-radius: 3px;
-      background: #e6e6e6;
-      border: 1px solid #bdbdbd;
-      color: #7b7b7b;
-      display: grid;
-      place-items: center;
-      font-size: 15px;
-    }
-
-    .tooltip-title {
-      color: #333;
-      font-size: 14px;
+    .machine-label {
+      max-width: 74px;
+      color: #d9e4ff;
+      font-size: 10px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .tooltip-line {
-      height: 1px;
-      background: #aaa;
-      margin: 8px 0 9px;
-    }
-
-    .tooltip-body div {
-      min-height: 18px;
-    }
-
-    .os-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.58);
-      display: none;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 38px 18px;
-      z-index: 60;
-    }
-
-    .os-modal-backdrop.open { display: flex; }
-
-    .os-modal {
-      width: min(1810px, calc(100vw - 36px));
-      background: #151515;
-      border: 1px solid #303030;
-      box-shadow: 0 20px 60px rgba(0,0,0,.58);
-      color: #d8d8d8;
-    }
-
-    .os-modal-head {
-      height: 72px;
-      background: #222;
-      border-bottom: 1px solid #6a6a6a;
+    .map-side {
       display: grid;
-      grid-template-columns: 46px minmax(0, 1fr) 38px;
-      align-items: end;
-      padding: 0 10px 8px;
-    }
-
-    .os-title {
-      text-align: center;
-      font-weight: 700;
-      font-size: 16px;
-      align-self: end;
-    }
-
-    .os-calendar {
-      width: 26px;
-      height: 26px;
-      border: 1px solid #888;
-      border-radius: 2px;
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      color: #cfcfcf;
-      margin-bottom: 2px;
-    }
-
-    .os-close {
-      width: 24px;
-      height: 24px;
-      border: 0;
-      border-radius: 4px;
-      background: #d8d8d8;
-      color: #202020;
-      display: grid;
-      place-items: center;
-      font-weight: 900;
-      cursor: pointer;
-      align-self: start;
-      justify-self: end;
-      margin-top: 5px;
-    }
-
-    .os-form {
-      padding: 8px 8px 10px;
-      display: grid;
-      grid-template-columns: .72fr .72fr 1.48fr 1.48fr 1.48fr 1.48fr;
-      gap: 9px 5px;
-    }
-
-    .os-field {
-      min-height: 32px;
-      border: 1px solid #666;
-      border-radius: 3px;
-      background: #1b1b1b;
-      position: relative;
-      display: grid;
-      align-content: end;
-    }
-
-    .os-field.wide { grid-column: span 2; }
-    .os-field.xwide { grid-column: span 3; }
-
-    .os-field label {
-      position: absolute;
-      left: 6px;
-      top: 2px;
-      color: #848484;
-      font-size: 10px;
-      text-transform: none;
-      font-weight: 400;
-    }
-
-    .os-field input,
-    .os-field select {
-      width: 100%;
-      height: 30px;
-      border: 0;
-      background: transparent;
-      color: #d7d7d7;
-      padding: 10px 28px 0 6px;
-      outline: none;
-      font-size: 14px;
-    }
-
-    .os-date {
-      position: absolute;
-      right: 5px;
-      bottom: 6px;
-      color: #e8e8e8;
-      font-size: 13px;
-    }
-
-    .os-chip {
-      display: inline-flex;
-      align-items: center;
-      width: fit-content;
-      height: 24px;
-      margin: 6px 0 4px 6px;
-      padding: 0 8px;
-      border-radius: 3px;
-      background: #d4d4d4;
-      color: #222;
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    .os-submit {
-      grid-column: 1 / -1;
-      height: 33px;
-      border: 0;
-      border-radius: 4px;
-      background: #139fe8;
-      color: #00131f;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
-    }
-
-    .os-submit:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.08);
-      box-shadow: 0 10px 24px rgba(19,159,232,.28);
-    }
-
-    .os-results {
-      margin: 0 8px 10px;
-      border: 1px solid #444;
-      display: none;
-    }
-
-    .os-results.open { display: block; }
-
-    .os-results table {
-      min-width: 980px;
-    }
-
-    .check-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.50);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      z-index: 62;
-    }
-
-    .check-modal-backdrop.open { display: flex; }
-
-    .check-modal {
-      width: 530px;
-      max-width: calc(100vw - 36px);
-      height: 482px;
-      max-height: calc(100vh - 36px);
-      background: #1c1c1c;
-      border: 1px solid #666;
-      border-radius: 4px;
-      color: #d8d8d8;
-      box-shadow: 0 18px 54px rgba(0,0,0,.62);
-      position: relative;
-      padding: 36px 6px 0;
-    }
-
-    .check-close {
-      position: absolute;
-      right: -1px;
-      top: -1px;
-      width: 24px;
-      height: 24px;
-      border: 1px solid #555;
-      border-radius: 4px;
-      background: #d8d8d8;
-      color: #202020;
-      font-weight: 900;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      font-size: 17px;
-    }
-
-    .check-tab {
-      position: absolute;
-      left: 6px;
-      top: 36px;
-      right: 6px;
-      height: 23px;
-      background: #80aec2;
-      color: #173444;
-      border-radius: 4px 4px 0 0;
-      display: flex;
-      align-items: center;
-      padding-left: 4px;
-      font-size: 13px;
-    }
-
-    .check-body {
-      position: absolute;
-      left: 6px;
-      right: 6px;
-      top: 59px;
-      bottom: 6px;
-      border: 1px solid #696969;
-      border-radius: 0 0 4px 4px;
-      background: #1c1c1c;
-      padding: 6px;
-      display: grid;
-      grid-template-rows: auto auto 1fr auto;
-    }
-
-    .check-title {
-      height: 27px;
-      display: grid;
-      grid-template-columns: 26px minmax(0, 1fr) 26px;
-      align-items: center;
-      border-bottom: 1px solid #686868;
-      font-size: 16px;
-      font-weight: 700;
-      text-align: center;
-      color: #eeeeee;
-    }
-
-    .check-icon {
-      width: 23px;
-      height: 23px;
-      border: 1px solid #8a8a8a;
-      display: grid;
-      place-items: center;
-      color: #cfcfcf;
-      font-size: 18px;
-    }
-
-    .check-filters {
-      width: min(420px, 100%);
-      margin: 18px auto 8px;
-      display: grid;
-      grid-template-columns: 150px minmax(0, 1fr);
-      gap: 8px 14px;
-      align-items: center;
-    }
-
-    .check-filters label {
-      color: #a7a7a7;
-      font-size: 16px;
-      text-transform: none;
-      font-weight: 400;
-    }
-
-    .check-select {
-      height: 31px;
-      border: 1px solid #646464;
-      border-radius: 3px;
-      background: #343434;
-      color: #cfcfcf;
-      padding: 0 30px 0 8px;
-      width: 100%;
-      font-size: 14px;
-    }
-
-    .check-table {
-      margin-top: 8px;
-      border-top: 1px solid #8a8a8a;
-    }
-
-    .check-table table {
-      min-width: 100%;
-    }
-
-    .check-table th,
-    .check-table td {
-      padding: 6px 14px;
-      height: 27px;
-      border: 1px solid #3d3d3d;
-    }
-
-    .check-table th {
-      background: #4e555d;
-      color: #eeeeee;
-      font-size: 13px;
-      text-transform: none;
-    }
-
-    .check-table td {
-      color: #d6d6d6;
-      background: #1b1b1b;
-    }
-
-    .check-footer {
-      border-top: 1px solid #8a8a8a;
-      padding: 8px 0 14px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .check-cancel {
-      width: 160px;
-      height: 33px;
-      border: 0;
-      border-radius: 5px;
-      background: #f266ca;
-      color: #2d0723;
-      font-size: 16px;
-      cursor: pointer;
-      transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
-    }
-
-    .check-cancel:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.05);
-      box-shadow: 0 10px 22px rgba(242,102,202,.24);
-    }
-
-    .new-os-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.54);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 14px;
-      z-index: 64;
-    }
-
-    .new-os-backdrop.open { display: flex; }
-
-    .new-os-modal {
-      width: 398px;
-      max-width: calc(100vw - 28px);
-      max-height: calc(100vh - 28px);
-      overflow: auto;
-      background: #1b1b1b;
-      border: 1px solid #5f5f5f;
-      border-radius: 3px;
-      color: #d5d5d5;
-      box-shadow: 0 18px 54px rgba(0,0,0,.62);
-      position: relative;
-      padding: 27px 4px 4px;
-    }
-
-    .new-os-close {
-      position: absolute;
-      right: -1px;
-      top: -1px;
-      width: 19px;
-      height: 19px;
-      border: 1px solid #555;
-      border-radius: 4px;
-      background: #d8d8d8;
-      color: #202020;
-      font-weight: 900;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-      z-index: 2;
-    }
-
-    .new-os-tabs {
-      position: absolute;
-      left: 4px;
-      top: 27px;
-      right: 4px;
-      display: flex;
-      align-items: end;
-      height: 39px;
-      overflow: hidden;
-    }
-
-    .new-os-tab {
-      height: 20px;
-      min-width: 54px;
-      border: 1px solid #626262;
-      border-bottom: 0;
-      background: #333;
-      color: #bdbdbd;
-      font-size: 10px;
-      display: grid;
-      place-items: center;
-      padding: 0 4px;
-    }
-
-    .new-os-tab.active {
-      background: #2a2a2a;
-      color: #e2e2e2;
-    }
-
-    .new-os-content {
-      margin-top: 39px;
-      border: 1px solid #626262;
-      border-radius: 0 0 3px 3px;
-      padding: 4px 5px 0;
-    }
-
-    .new-os-title {
-      height: 27px;
-      display: grid;
-      grid-template-columns: 23px 82px minmax(0, 1fr);
-      align-items: center;
-      gap: 4px;
-      color: #f1f1f1;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .new-os-gear {
-      width: 21px;
-      height: 21px;
-      border: 1px solid #777;
-      display: grid;
-      place-items: center;
-      color: #cfcfcf;
-      font-size: 15px;
-    }
-
-    .model-select {
-      height: 23px;
-      border: 1px solid #676767;
-      background: #363636;
-      color: #d8d8d8;
-      border-radius: 3px;
-      padding: 0 4px;
-      font-size: 12px;
-    }
-
-    .new-os-grid {
-      display: grid;
-      grid-template-columns: 130px minmax(0, 1fr);
-      gap: 6px 5px;
-      align-items: center;
-      padding: 0 5px;
-    }
-
-    .new-os-grid label {
-      color: #929292;
-      font-size: 12px;
-      text-transform: none;
-      font-weight: 400;
-    }
-
-    .new-field,
-    .new-select {
-      height: 25px;
-      border: 1px solid #656565;
-      border-radius: 2px;
-      background: #191919;
-      color: #d8d8d8;
-      padding: 0 7px;
-      width: 100%;
-      font-size: 12px;
-    }
-
-    .new-select.filled,
-    .new-field.filled {
-      background: #393939;
-    }
-
-    .duration-row {
-      display: grid;
-      grid-template-columns: 42px 30px minmax(0, 1fr) 28px;
-      gap: 5px;
-      align-items: center;
-    }
-
-    .duration-row span {
-      color: #b8b8b8;
-      font-size: 12px;
-    }
-
-    .new-area {
-      margin: 8px 5px 0;
-      height: 59px;
-      border: 1px solid #686868;
-      background: #161616;
-      color: #d8d8d8;
-      width: calc(100% - 10px);
-      resize: vertical;
-      padding: 7px;
-      font-size: 12px;
-    }
-
-    .category-input {
-      margin: 14px 20px 12px;
-      height: 24px;
-      border: 1px solid #686868;
-      border-radius: 5px;
-      background: #191919;
-      color: #999;
-      padding: 0 8px;
-      width: calc(100% - 40px);
-      font-size: 11px;
-    }
-
-    .toggle-list {
-      display: grid;
-      gap: 9px;
-      margin: 0 12px 12px;
-    }
-
-    .toggle-row {
-      display: grid;
-      grid-template-columns: 38px minmax(0, 1fr);
-      align-items: center;
-      gap: 9px;
-      color: #999;
-      font-size: 12px;
-    }
-
-    .fake-toggle {
-      width: 27px;
-      height: 15px;
-      border-radius: 999px;
-      background: #4a4a4a;
-      position: relative;
-      display: inline-grid;
-      place-items: center;
-      color: #c9c9c9;
-      font-size: 10px;
-    }
-
-    .fake-toggle::before {
-      content: "";
-      position: absolute;
-      left: 2px;
-      top: 2px;
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      background: #252525;
-    }
-
-    .new-os-actions {
-      border-top: 1px solid #777;
-      display: flex;
-      justify-content: center;
-      gap: 18px;
-      padding: 7px 0 14px;
-    }
-
-    .new-cancel,
-    .new-confirm {
-      width: 120px;
-      height: 25px;
-      border: 0;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-    }
-
-    .new-cancel { background: #f266ca; color: #2d0723; }
-    .new-confirm { background: #119feb; color: #00131f; }
-
-    .new-cancel:hover,
-    .new-confirm:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.06);
-      box-shadow: 0 9px 20px rgba(0,0,0,.28);
-    }
-
-    .open-os-pop {
-      position: fixed;
-      width: 134px;
-      background: #1b1b1b;
-      border: 1px solid #2d2d2d;
-      box-shadow: 0 12px 32px rgba(0,0,0,.55);
-      display: none;
-      z-index: 66;
-      padding-top: 24px;
-      color: #d7d7d7;
-    }
-
-    .open-os-pop.open { display: block; }
-
-    .open-os-close {
-      position: absolute;
-      right: 0;
-      top: -24px;
-      width: 19px;
-      height: 19px;
-      border: 1px solid #555;
-      border-radius: 4px;
-      background: #d8d8d8;
-      color: #202020;
-      font-weight: 900;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      font-size: 13px;
-    }
-
-    .open-os-toolbar {
-      height: 29px;
-      background: #48515c;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 3px;
-      padding-right: 5px;
-    }
-
-    .open-os-tool {
-      width: 18px;
-      height: 18px;
-      border: 1px solid #9aa2ad;
-      border-radius: 3px;
-      background: #37414b;
-      color: #dce8f0;
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-    }
-
-    .open-os-tool.excel {
-      background: #0f6f38;
-      color: #fff;
-      font-weight: 800;
-    }
-
-    .open-os-empty {
-      height: 25px;
-      display: flex;
-      align-items: center;
-      padding-left: 6px;
-      font-size: 11px;
-      color: #cfcfcf;
-      border-bottom: 1px solid #333;
-    }
-
-    .open-os-pager {
-      height: 33px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding-left: 10px;
-      color: #cfcfcf;
-      font-size: 13px;
-    }
-
-    .pager-select {
-      width: 38px;
-      height: 20px;
-      border: 1px solid #c4c4c4;
-      background: #252525;
-      color: #fff;
-      font-size: 12px;
-      padding: 0 2px;
-    }
-
-    .compiled-backdrop {
-      position: fixed;
-      inset: 0;
-      background: #1d2f45;
-      display: none;
-      z-index: 68;
-      color: #111;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    .compiled-backdrop.open { display: block; }
-
-    .compiled-toolbar {
-      height: 29px;
-      background: #4055b9;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding-left: 6px;
-    }
-
-    .compiled-toolbar input,
-    .compiled-toolbar select {
-      height: 20px;
-      border: 1px solid #20408c;
-      border-radius: 2px;
-      background: #fff;
-      color: #111;
-      font-size: 12px;
-      padding: 0 4px;
-      min-width: auto;
-    }
-
-    .compiled-tool-btn {
-      width: 21px;
-      height: 20px;
-      border: 0;
-      border-radius: 3px;
-      background: #fff;
-      color: #111;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .compiled-close {
-      margin-left: auto;
-      margin-right: 8px;
-      width: 23px;
-      height: 22px;
-      border: 0;
-      border-radius: 4px;
-      background: #f1f1f1;
-      color: #111;
-      font-weight: 900;
-      cursor: pointer;
-    }
-
-    .compiled-page {
-      margin: 11px 7px;
-      height: calc(100vh - 40px);
-      background: #fff;
-      border-radius: 6px;
-      padding: 15px 8px 10px;
-      overflow: auto;
-    }
-
-    .compiled-sheet {
-      width: 1180px;
-      max-width: 100%;
-      min-height: calc(100vh - 72px);
-      display: grid;
-      grid-template-rows: auto auto 1fr auto;
-    }
-
-    .compiled-header {
-      display: grid;
-      grid-template-columns: 88px minmax(0, 1fr) 170px;
-      align-items: center;
-      gap: 12px;
-      padding: 0 8px;
-    }
-
-    .muriel-box {
-      width: 70px;
-      height: 37px;
-      background: #ff4b68;
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-      border-radius: 0;
-      line-height: 1;
-    }
-
-    .compiled-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: #4055b9;
-    }
-
-    .compiled-logo {
-      font-size: 36px;
-      color: #202020;
-      text-align: center;
-      letter-spacing: -2px;
-    }
-
-    .compiled-info {
-      margin: 10px 6px 4px;
-      border: 1px solid #777;
-      border-radius: 5px;
-      height: 26px;
-      display: grid;
-      grid-template-columns: 260px 250px 190px minmax(0, 1fr);
-      align-items: center;
-      font-size: 12px;
-      padding: 0 8px;
-    }
-
-    .compiled-info strong { margin-right: 6px; }
-
-    .compiled-blue-line {
-      height: 2px;
-      background: #4055ff;
-      margin: 0 6px 22px;
-    }
-
-    .compiled-content {
-      padding: 0 26px;
-    }
-
-    .compiled-note {
-      height: 19px;
-      border: 1px solid #999;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      padding-left: 3px;
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-
-    .compiled-observation {
-      height: 96px;
-      border: 1px solid #888;
-      border-radius: 0 0 6px 6px;
-      position: relative;
-      font-size: 12px;
-      padding: 4px;
-    }
-
-    .compiled-eye {
-      position: absolute;
-      right: 4px;
-      top: 0;
-      color: #000;
-      font-size: 18px;
-    }
-
-    .compiled-signature {
-      margin-top: 116px;
-      display: grid;
-      justify-items: center;
-      gap: 8px;
-      font-size: 11px;
-      color: #24345f;
-    }
-
-    .compiled-signature button {
-      height: 20px;
-      border: 1px solid #777;
-      background: #fff;
-      color: #111;
-      font-size: 11px;
-      cursor: pointer;
-    }
-
-    .signature-line {
-      width: 205px;
-      border-top: 1px solid #111;
-    }
-
-    .compiled-footer {
-      border-top: 2px solid #4055ff;
-      margin: 0 6px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #4055b9;
-      font-size: 12px;
-    }
-
-    .compiled-footer strong {
-      color: #333;
-      font-size: 18px;
-      letter-spacing: -1px;
-    }
-
-    @media (max-width: 1100px) {
-      .os-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .os-field.wide,
-      .os-field.xwide { grid-column: span 1; }
-    }
-
-    .details-head {
-      height: 38px;
-      background: linear-gradient(90deg, #123f8d, #0d2f73);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px;
-      font-weight: 700;
-      color: #d7f3dc;
-    }
-
-    .details-body {
-      padding: 12px;
-      display: grid;
-      gap: 8px;
-      color: #cfcfcf;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      min-height: 22px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.22);
-      color: #cfcfcf;
-      padding: 0 8px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .pill.green { color: #83e896; border-color: #197c2c; }
-    .pill.orange { color: #ffbb74; border-color: #8a4f12; }
-    .pill.red { color: #ff8888; border-color: #9a2929; }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .tab {
-      height: 30px;
-      border: 1px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.08);
-      color: #bbb;
-      border-radius: 3px;
-      padding: 0 10px;
-      cursor: pointer;
-      transition: transform .18s ease, background .18s ease, border-color .18s ease;
-    }
-
-    .tab:hover {
-      transform: translateY(-2px);
-      border-color: rgba(255,138,76,.65);
-      background: rgba(255,138,76,.12);
-    }
-
-    .tab.active {
-      background: var(--brand-orange);
-      color: #08193a;
-      border-color: var(--brand-orange);
-    }
-
-    .admin-panel {
-      display: none;
-      min-width: 1180px;
-    }
-
-    .admin-panel.active { display: block; }
-
-    .admin-grid {
-      display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr);
       gap: 10px;
+      align-content: start;
     }
 
-    .card {
-      background: rgba(8, 23, 52, .88);
-      border: 1px solid rgba(255,255,255,.20);
-      border-radius: 4px;
-      overflow: hidden;
+    .side-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(255,255,255,.06);
+      display: grid;
+      gap: 7px;
     }
 
-    .card-head {
-      height: 34px;
-      background: linear-gradient(90deg, #123f8d, #0d2f73);
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      color: #cdebd2;
-      font-weight: 700;
-    }
-
-    .form-grid {
+    .form {
       padding: 12px;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0,1fr));
       gap: 10px;
     }
 
     label {
-      display: grid;
-      gap: 4px;
-      color: #aaa;
+      color: var(--muted);
       font-size: 11px;
-      font-weight: 700;
       text-transform: uppercase;
+      font-weight: 800;
+      display: grid;
+      gap: 5px;
     }
 
     .field {
-      height: 32px;
+      width: 100%;
+      height: 34px;
       border: 1px solid rgba(255,255,255,.22);
-      border-radius: 3px;
+      border-radius: 5px;
       background: rgba(255,255,255,.08);
       color: #fff;
-      padding: 0 8px;
-      width: 100%;
+      padding: 0 9px;
     }
 
+    .field option { color: #111; }
+
     textarea.field {
-      min-height: 70px;
+      height: 76px;
       padding-top: 8px;
       resize: vertical;
     }
 
     .full { grid-column: 1 / -1; }
 
-    .button {
-      height: 32px;
-      border: 1px solid var(--brand-orange);
-      border-radius: 3px;
-      background: var(--brand-orange);
-      color: #08193a;
-      cursor: pointer;
-      font-weight: 700;
-      padding: 0 12px;
-      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-    }
-
-    .button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(255,138,76,.28);
-      filter: brightness(1.06);
-    }
+    .table-wrap { overflow: auto; }
 
     table {
       width: 100%;
-      border-collapse: collapse;
       min-width: 760px;
+      border-collapse: collapse;
     }
 
     th, td {
-      padding: 9px 10px;
-      border-bottom: 1px solid #3a3a3a;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
       text-align: left;
-      color: #cfcfcf;
+      vertical-align: middle;
     }
 
     th {
-      background: #181818;
-      color: #9b9b9b;
+      background: rgba(255,255,255,.08);
+      color: var(--muted);
       font-size: 11px;
       text-transform: uppercase;
     }
 
-    .table-wrap { overflow: auto; }
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
 
-    .fab {
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      border-radius: 999px;
+      padding: 0 8px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(255,255,255,.08);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .tag.ok { color: var(--ok); }
+    .tag.warn { color: var(--warn); }
+    .tag.danger { color: var(--danger); }
+
+    .context-menu {
       position: fixed;
-      right: 8px;
-      bottom: 18px;
-      width: 44px;
-      height: 54px;
-      border-radius: 12px;
-      background: #5b4df5;
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-size: 24px;
-      box-shadow: 0 12px 28px rgba(0,0,0,.4);
+      width: 245px;
+      background: #0d2f73;
+      border: 1px solid rgba(255,255,255,.28);
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 30;
+      padding: 6px 6px 6px 0;
+    }
+
+    .context-menu.open { display: block; }
+
+    .menu-item {
+      width: 100%;
+      height: 34px;
       border: 0;
-      cursor: pointer;
-      transition: transform .2s ease, box-shadow .2s ease;
+      border-bottom: 1px solid rgba(255,255,255,.18);
+      background: transparent;
+      color: #e8eefc;
+      display: grid;
+      grid-template-columns: 34px minmax(0,1fr);
+      align-items: center;
+      text-align: left;
     }
 
-    .fab:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 16px 34px rgba(255,138,76,.24);
-      background: var(--brand-orange);
+    .menu-item:hover {
+      background: rgba(255,138,76,.18);
     }
 
-    @keyframes logoFloat {
-      0%, 100% { transform: translateY(0); }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      background: #111b32;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 8px;
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .modal.large { width: min(1180px, 100%); }
+
+    .modal-head {
+      min-height: 44px;
+      background: linear-gradient(90deg, var(--blue-700), var(--blue-800));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-weight: 800;
+    }
+
+    .modal-body {
+      padding: 14px;
+    }
+
+    .close {
+      width: 26px;
+      height: 26px;
+      border: 0;
+      border-radius: 5px;
+      background: #fff;
+      color: #08193a;
+      font-weight: 900;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #fff;
+      color: #071a3e;
+      border-radius: 8px;
+      padding: 10px 14px;
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 90;
+      font-weight: 800;
+    }
+
+    .toast.open { display: block; }
+
+    @keyframes floatLogo {
+      0%,100% { transform: translateY(0); }
       50% { transform: translateY(-2px); }
     }
 
     @keyframes wrenchTurn {
-      0%, 100% { transform: rotate(-18deg) scale(1); }
-      50% { transform: rotate(12deg) scale(1.04); }
+      0%,100% { transform: rotate(-18deg); }
+      50% { transform: rotate(12deg); }
     }
 
-    @keyframes alertPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(3,169,244,0); }
-      50% { transform: scale(1.12); box-shadow: 0 0 16px rgba(3,169,244,.7); }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,138,76,0); }
+      50% { transform: scale(1.12); box-shadow: 0 0 18px rgba(255,138,76,.7); }
     }
 
-    @media (max-width: 980px) {
+    @media (max-width: 1050px) {
       body { overflow: auto; }
       .workspace { height: auto; }
-      .line-grid { grid-template-columns: 1fr; }
-      .unit, .admin-panel { min-width: 980px; }
+      .metrics, .two-col, .admin-grid, .map-shell { grid-template-columns: 1fr; }
+      .searchbar { width: 100%; }
+      .nav { height: auto; align-items: stretch; flex-direction: column; }
     }
   </style>
 </head>
@@ -1875,958 +644,719 @@
     <div>
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 64 64" role="img">
+          <svg viewBox="0 0 64 64">
             <path fill="currentColor" d="M43.2 7.4c-4.9-1.5-10.4-.3-14.3 3.6-4.2 4.2-5.2 10.5-3 15.7L8.8 43.8c-2.8 2.8-2.8 7.4 0 10.2l1.2 1.2c2.8 2.8 7.4 2.8 10.2 0l17.1-17.1c5.2 2.2 11.5 1.2 15.7-3 3.9-3.9 5.1-9.4 3.6-14.3l-9.4 9.4-8.1-2.1-2.1-8.1 9.4-9.4c-1-.5-2.1-.9-3.2-1.2ZM15.2 51.9a3.3 3.3 0 1 1 0-6.6 3.3 3.3 0 0 1 0 6.6Z"/>
           </svg>
         </div>
-        <div class="brand-name">GestMan<span>365</span></div>
+        <div>
+          <div class="brand-name">GestMan<span>365</span></div>
+          <div class="brand-sub">industrial maintenance intelligence</div>
+        </div>
       </div>
-      <div class="brand-sub">industrial maintenance intelligence</div>
     </div>
-    <div class="top-actions" aria-label="Atalhos">
-      <div class="top-icon">⌂</div>
-      <div class="top-icon">▰<span class="badge">1</span></div>
-      <div class="top-icon">☁<span class="badge">31</span></div>
-      <div class="top-icon">?</div>
-      <div class="avatar"></div>
+    <div class="top-actions">
+      <span class="admin-pill">Administrador</span>
+      <button class="btn" id="exportBtn">Exportar</button>
+      <button class="btn danger" id="wipeBtn">Apagar tudo</button>
     </div>
   </header>
 
-  <div class="toolbar">
-    <div class="filters">
-      <div class="search"><input id="searchInput" placeholder="Pesquisar"></div>
-      <div class="select-wrap">
-        <label>Regiao</label>
-        <select id="regionFilter">
-          <option value="">[Todas]</option>
-          <option>Linha 01 - Producao</option>
-          <option>Linha 02 - Producao</option>
-          <option>Utilidades</option>
-        </select>
-      </div>
+  <nav class="nav">
+    <div class="tabs">
+      <button class="tab active" data-view="dashboard">Dashboard</button>
+      <button class="tab" data-view="map">Mapa industrial</button>
+      <button class="tab" data-view="assets">Máquinas</button>
+      <button class="tab" data-view="locations">Locais</button>
+      <button class="tab" data-view="tags">Tags</button>
+      <button class="tab" data-view="orders">Ordens</button>
+      <button class="tab" data-view="checklists">Checklists</button>
     </div>
-    <div class="tool-buttons">
-      <span id="connectionStatus" class="pill">Conectando...</span>
-      <button class="square-btn orange" id="filterBtn">▼</button>
-      <button class="square-btn" id="reloadBtn">↻</button>
-    </div>
-  </div>
+    <input class="searchbar" id="globalSearch" placeholder="Pesquisar máquina, local, tag ou OS">
+  </nav>
 
   <main class="workspace">
-    <div class="tabs">
-      <button class="tab active" data-view="overview">Parque industrial</button>
-      <button class="tab" data-view="admin">Cadastros</button>
-    </div>
-
-    <section class="unit" id="overview">
-      <div class="unit-head">
-        <div class="drag-dots"></div>
-        <div class="collapse">−</div>
-        <div>UNIDADE 01- FABRICA - <span id="locationCount">0</span> local(is)</div>
+    <section class="view active" id="dashboard">
+      <div class="grid metrics">
+        <div class="metric"><span>MTTR médio</span><strong id="mttrMetric">0h</strong><small>Tempo médio para reparar</small></div>
+        <div class="metric"><span>MTBF médio</span><strong id="mtbfMetric">0h</strong><small>Tempo médio entre falhas</small></div>
+        <div class="metric"><span>Disponibilidade</span><strong id="availabilityMetric">0%</strong><small>Estimativa operacional</small></div>
+        <div class="metric"><span>Máquinas cadastradas</span><strong id="assetMetric">0</strong><small>Parque industrial criado</small></div>
       </div>
-      <div class="line-grid" id="lineGrid"></div>
+
+      <div class="grid two-col" style="margin-top:14px">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Tendência MTTR x MTBF</div><button class="btn primary" data-view-button="assets">Criar máquina</button></div>
+          <div class="line-chart" id="trendChart"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Backlog por status</div><button class="btn" data-view-button="orders">Ver OS</button></div>
+          <div class="chart" id="statusBars"></div>
+        </div>
+      </div>
+
+      <div class="grid two-col" style="margin-top:14px">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Criticidade do parque</div></div>
+          <div class="chart" id="criticalityBars"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Próximos passos</div></div>
+          <div id="nextSteps" class="empty"></div>
+        </div>
+      </div>
     </section>
 
-    <section class="admin-panel" id="admin">
-      <div class="admin-grid">
-        <div class="card">
-          <div class="card-head">Criar local / linha</div>
-          <form class="form-grid" id="locationForm">
-            <label>Nome <input class="field" name="nome" placeholder="Linha 12 - Producao" required></label>
-            <label>Tipo
-              <select class="field" name="tipo"><option>Linha</option><option>Area</option><option>Celula</option><option>Sala</option></select>
-            </label>
-            <label>Cor <input class="field" name="cor" value="#123f8d"></label>
-            <label>Codigo visual <input class="field" name="codigo_visual" placeholder="L12"></label>
-            <div class="full"><button class="button" type="submit">Salvar local</button></div>
-          </form>
-        </div>
-
-        <div class="card">
-          <div class="card-head">Criar maquina / equipamento</div>
-          <form class="form-grid" id="assetForm">
-            <label>Codigo <input class="field" name="codigo" placeholder="ME-40" required></label>
-            <label>Nome <input class="field" name="nome" placeholder="Misturador" required></label>
-            <label>Setor <input class="field" name="setor" placeholder="Linha de producao" required></label>
-            <label>Local <select class="field" name="local_id" id="assetLocation"></select></label>
-            <label>Tag <select class="field" name="tag_id" id="assetTag"></select></label>
-            <label>Subtag <select class="field" name="sub_tag_id" id="assetSubTag"></select></label>
-            <label>Criticidade
-              <select class="field" name="criticidade"><option>Baixa</option><option selected>Media</option><option>Alta</option></select>
-            </label>
-            <label>Status
-              <select class="field" name="status"><option selected>Operando</option><option>Em manutencao</option><option>Inspecao</option><option>Inativo</option></select>
-            </label>
-            <label>Responsavel <input class="field" name="responsavel"></label>
-            <label>Tipo visual
-              <select class="field" name="icone">
-                <option value="me">ME - modulo</option>
-                <option value="tank">RT - tanque</option>
-                <option value="box">MF - caixa</option>
-                <option value="funnel">INK - funil</option>
-                <option value="os">OS - ordem</option>
-                <option value="light">ILUP - luz</option>
-                <option value="flow">Fluxo</option>
-              </select>
-            </label>
-            <div class="full"><button class="button" type="submit">Salvar maquina</button></div>
-          </form>
-        </div>
-      </div>
-
-      <div class="admin-grid" style="margin-top:10px">
-        <div class="card">
-          <div class="card-head">Tags e subtags</div>
-          <form class="form-grid" id="tagForm">
-            <label>Tag <input class="field" name="codigo" placeholder="MEC" required></label>
-            <label>Nome <input class="field" name="nome" placeholder="Mecanica" required></label>
-            <label class="full">Descricao <textarea class="field" name="descricao"></textarea></label>
-            <div class="full"><button class="button" type="submit">Salvar tag</button></div>
-          </form>
-          <form class="form-grid" id="subTagForm">
-            <label>Tag principal <select class="field" name="tag_id" id="subTagParent"></select></label>
-            <label>Subtag <input class="field" name="codigo" placeholder="ROL" required></label>
-            <label class="full">Nome <input class="field" name="nome" placeholder="Rolamento" required></label>
-            <div class="full"><button class="button" type="submit">Salvar subtag</button></div>
-          </form>
-        </div>
-        <div class="card">
-          <div class="card-head">Ativos cadastrados</div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Codigo</th><th>Nome</th><th>Local</th><th>Tag</th><th>Subtag</th><th>Status</th></tr></thead>
-              <tbody id="assetRows"></tbody>
-            </table>
+    <section class="view" id="map">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Mapa industrial profissional</div>
+          <div class="toolbar">
+            <button class="btn primary" data-view-button="locations">Criar local</button>
+            <button class="btn primary" data-view-button="assets">Criar máquina</button>
           </div>
         </div>
+        <div class="map-shell">
+          <div class="industrial-map" id="industrialMap"></div>
+          <div class="map-side">
+            <div class="side-box" id="mapDetails">
+              <strong>Nenhuma máquina selecionada</strong>
+              <span class="muted">Clique em uma máquina no mapa para ver ações.</span>
+            </div>
+            <div class="side-box">
+              <strong>Legenda</strong>
+              <span><span class="tag danger">Alta criticidade</span></span>
+              <span><span class="tag warn">Média criticidade</span></span>
+              <span><span class="tag ok">Baixa criticidade</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="assets">
+      <div class="grid admin-grid">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title" id="assetFormTitle">Criar máquina</div></div>
+          <form class="form" id="assetForm">
+            <input type="hidden" id="assetId">
+            <label>Código <input class="field" id="assetCode" required placeholder="RT-01"></label>
+            <label>Nome <input class="field" id="assetName" required placeholder="Reator 01"></label>
+            <label>Local <select class="field" id="assetLocation"></select></label>
+            <label>Tag <select class="field" id="assetTag"></select></label>
+            <label>Subtag <select class="field" id="assetSubtag"></select></label>
+            <label>Criticidade <select class="field" id="assetCriticality"><option>Baixa</option><option>Média</option><option>Alta</option></select></label>
+            <label>Status <select class="field" id="assetStatus"><option>Operando</option><option>Inspeção</option><option>Em manutenção</option><option>Inativo</option></select></label>
+            <label>Marca <input class="field" id="assetBrand" placeholder="WEG, Muriel, Atlas"></label>
+            <label>Modelo <input class="field" id="assetModel" placeholder="Modelo"></label>
+            <label>Tipo visual <select class="field" id="assetIcon"><option value="RT">Reator/Tanque</option><option value="ME">Módulo</option><option value="MF">Máquina</option><option value="INK">Funil</option><option value="OS">Estação</option><option value="ILUP">Iluminação</option></select></label>
+            <label>Posição X (%) <input class="field" id="assetX" type="number" min="3" max="97" value="50"></label>
+            <label>Posição Y (%) <input class="field" id="assetY" type="number" min="3" max="97" value="50"></label>
+            <label class="full">Descrição <textarea class="field" id="assetDescription" placeholder="Descrição da máquina"></textarea></label>
+            <div class="full toolbar">
+              <button class="btn primary" type="submit">Salvar máquina</button>
+              <button class="btn" type="button" id="resetAssetForm">Limpar formulário</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Máquinas cadastradas</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Código</th><th>Nome</th><th>Local</th><th>Criticidade</th><th>Status</th><th>Ações</th></tr></thead><tbody id="assetRows"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="locations">
+      <div class="grid admin-grid">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title" id="locationFormTitle">Criar local</div></div>
+          <form class="form" id="locationForm">
+            <input type="hidden" id="locationId">
+            <label>Nome <input class="field" id="locationName" required placeholder="Linha 01 - Produção"></label>
+            <label>Tipo <select class="field" id="locationType"><option>Linha</option><option>Área</option><option>Célula</option><option>Sala</option><option>Prédio</option></select></label>
+            <label>Cor <input class="field" id="locationColor" value="#123f8d"></label>
+            <label>X (%) <input class="field" id="locationX" type="number" min="0" max="90" value="5"></label>
+            <label>Y (%) <input class="field" id="locationY" type="number" min="0" max="90" value="8"></label>
+            <label>Largura (%) <input class="field" id="locationW" type="number" min="8" max="95" value="38"></label>
+            <label>Altura (%) <input class="field" id="locationH" type="number" min="8" max="95" value="28"></label>
+            <div class="full toolbar">
+              <button class="btn primary" type="submit">Salvar local</button>
+              <button class="btn" type="button" id="resetLocationForm">Limpar formulário</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Locais cadastrados</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Tipo</th><th>Posição</th><th>Tamanho</th><th>Ações</th></tr></thead><tbody id="locationRows"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="tags">
+      <div class="grid admin-grid">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title" id="tagFormTitle">Criar tag/subtag</div></div>
+          <form class="form" id="tagForm">
+            <input type="hidden" id="tagId">
+            <label>Código <input class="field" id="tagCode" required placeholder="MEC"></label>
+            <label>Nome <input class="field" id="tagName" required placeholder="Mecânica"></label>
+            <label class="full">Descrição <textarea class="field" id="tagDescription"></textarea></label>
+            <div class="full toolbar">
+              <button class="btn primary" type="submit">Salvar tag</button>
+              <button class="btn" type="button" id="resetTagForm">Limpar</button>
+            </div>
+          </form>
+          <form class="form" id="subtagForm" style="border-top:1px solid var(--line)">
+            <input type="hidden" id="subtagId">
+            <label>Tag pai <select class="field" id="subtagParent"></select></label>
+            <label>Código <input class="field" id="subtagCode" required placeholder="ROL"></label>
+            <label class="full">Nome <input class="field" id="subtagName" required placeholder="Rolamento"></label>
+            <div class="full toolbar">
+              <button class="btn primary" type="submit">Salvar subtag</button>
+              <button class="btn" type="button" id="resetSubtagForm">Limpar</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Taxonomia</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Código</th><th>Nome</th><th>Descrição/Pai</th><th>Ações</th></tr></thead><tbody id="tagRows"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="orders">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Ordens de Serviço</div>
+          <button class="btn primary" id="createOrderBtn">Nova OS</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>OS</th><th>Máquina</th><th>Tipo</th><th>Prioridade</th><th>Status</th><th>MTTR</th><th>Ações</th></tr></thead><tbody id="orderRows"></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="view" id="checklists">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Checklists</div>
+          <button class="btn primary" id="createChecklistBtn">Novo checklist</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>ID</th><th>Máquina</th><th>Nome</th><th>Último preenchimento</th><th>Ações</th></tr></thead><tbody id="checklistRows"></tbody></table></div>
       </div>
     </section>
   </main>
 
-  <aside class="details-panel" id="detailsPanel">
-    <div class="details-head">
-      <span id="detailsTitle">Equipamento</span>
-      <button class="square-btn" id="closeDetails">×</button>
-    </div>
-    <div class="details-body" id="detailsBody"></div>
-  </aside>
-
-  <div class="machine-menu" id="machineMenu">
-    <button class="menu-close" id="closeMachineMenu">×</button>
-    <button class="menu-item" data-action="checklists"><span class="menu-ico">☑</span><span>CheckLists</span></button>
-    <button class="menu-item" data-action="nova-os"><span class="menu-ico">⚙</span><span>Nova OS</span></button>
-    <button class="menu-item" data-action="historico"><span class="menu-ico">▦</span><span>Historico de OS's</span></button>
-    <button class="menu-item" data-action="abertas"><span class="menu-ico">▦</span><span>Listar OS's Abertas</span></button>
-    <button class="menu-item" data-action="pendencias"><span class="menu-ico">▦</span><span>Listar Pendencias Abertas</span></button>
-    <button class="menu-item" data-action="compilado"><span class="menu-ico">▦</span><span>Compilado de Checklist</span></button>
-    <button class="menu-item" data-action="especialista"><span class="menu-ico bot">BOT</span><span>Especialista GestMan365</span></button>
+  <div class="context-menu" id="machineMenu">
+    <button class="menu-item" data-machine-action="checklists"><span>☑</span><span>CheckLists</span></button>
+    <button class="menu-item" data-machine-action="newOrder"><span>⚙</span><span>Nova OS</span></button>
+    <button class="menu-item" data-machine-action="history"><span>▦</span><span>Histórico de OS's</span></button>
+    <button class="menu-item" data-machine-action="openOrders"><span>▦</span><span>Listar OS's Abertas</span></button>
+    <button class="menu-item" data-machine-action="pending"><span>▦</span><span>Listar Pendências Abertas</span></button>
+    <button class="menu-item" data-machine-action="compiled"><span>▦</span><span>Compilado de Checklist</span></button>
+    <button class="menu-item" data-machine-action="specialist"><span>BOT</span><span>Especialista GestMan365</span></button>
   </div>
 
-  <div class="machine-tooltip" id="machineTooltip"></div>
-
-  <div class="os-modal-backdrop" id="osModal">
-    <div class="os-modal">
-      <div class="os-modal-head">
-        <div class="os-calendar">▦</div>
-        <div class="os-title">Lista de OS</div>
-        <button class="os-close" id="closeOsModal">×</button>
-      </div>
-      <div class="os-form">
-        <div class="os-field">
-          <label>Entre as Datas</label>
-          <input id="osStartDate" value="16/03/2026">
-          <span class="os-date">▣</span>
-        </div>
-        <div class="os-field">
-          <label>&nbsp;</label>
-          <input id="osEndDate" value="15/06/2026">
-          <span class="os-date">▣</span>
-        </div>
-        <div class="os-field wide">
-          <label>Tipo de Servico</label>
-          <select><option>[Todos]</option><option>Corretiva</option><option>Preventiva</option><option>Inspecao</option></select>
-        </div>
-        <div class="os-field wide">
-          <label>Tipo de Manutencao</label>
-          <select><option>[Todos]</option><option>Mecanica</option><option>Eletrica</option><option>Utilidades</option></select>
-        </div>
-        <div class="os-field wide">
-          <label>Executante</label>
-          <select><option>[Todos]</option><option>Manutencao</option><option>Confiabilidade</option></select>
-        </div>
-        <div class="os-field wide">
-          <label>Considerar Equipe</label>
-          <select><option>Nao</option><option>Sim</option></select>
-        </div>
-        <div class="os-field wide">
-          <label>Regiao</label>
-          <select><option>[Todos]</option><option>Linha 01 - Producao</option><option>Linha 02 - Producao</option></select>
-        </div>
-        <div class="os-field wide">
-          <label>Local</label>
-          <select><option>[Todos]</option></select>
-        </div>
-        <div class="os-field wide">
-          <label>TAG</label>
-          <input id="osTag" value="RT-14">
-        </div>
-        <div class="os-field wide">
-          <label>Nº da OS</label>
-          <input id="osNumber">
-        </div>
-        <div class="os-field wide">
-          <label>Calcular Custos</label>
-          <select><option>Nao</option><option>Sim</option></select>
-        </div>
-        <div class="os-field wide">
-          <label>Maquina Parada</label>
-          <select><option>[Todos]</option><option>Sim</option><option>Nao</option></select>
-        </div>
-        <div class="os-field xwide">
-          <label>Status</label>
-          <span class="os-chip">× [Todos]</span>
-        </div>
-        <div class="os-field xwide">
-          <label>Categorias</label>
-          <input>
-        </div>
-        <button class="os-submit" id="submitOsList">Submeter</button>
-      </div>
-      <div class="os-results" id="osResults">
-        <table>
-          <thead><tr><th>OS</th><th>TAG</th><th>Descricao</th><th>Status</th><th>Executante</th><th>Data</th></tr></thead>
-          <tbody id="osRows"></tbody>
-        </table>
-      </div>
+  <div class="modal-backdrop" id="genericModal">
+    <div class="modal" id="genericModalBox">
+      <div class="modal-head"><span id="genericTitle">Janela</span><button class="close" data-close-modal>×</button></div>
+      <div class="modal-body" id="genericBody"></div>
     </div>
   </div>
 
-  <div class="check-modal-backdrop" id="checkModal">
-    <div class="check-modal">
-      <button class="check-close" id="closeCheckModal">×</button>
-      <div class="check-tab">Geral</div>
-      <div class="check-body">
-        <div class="check-title">
-          <div class="check-icon">☑</div>
-          <div>CheckLists Disponíveis</div>
-          <div></div>
-        </div>
-        <div class="check-filters">
-          <label>Local</label>
-          <select class="check-select" id="checkLocal"><option>MANIPULAÇÃO</option><option>PRODUÇÃO</option><option>UTILIDADES</option></select>
-          <label>LI</label>
-          <select class="check-select" id="checkLi"><option>REATORES</option><option>ENVASE</option><option>ROTULAGEM</option></select>
-          <label>TAG</label>
-          <select class="check-select" id="checkTag"><option>R-03</option></select>
-        </div>
-        <div class="check-table">
-          <table>
-            <thead><tr><th style="width:80px">ID</th><th>Nome</th><th style="width:260px">Último Preenchimento</th></tr></thead>
-            <tbody id="checkRows"><tr><td colspan="3">Nenhum checklist vinculado</td></tr></tbody>
-          </table>
-        </div>
-        <div class="check-footer">
-          <button class="check-cancel" id="cancelCheckModal">Cancelar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="new-os-backdrop" id="newOsModal">
-    <div class="new-os-modal">
-      <button class="new-os-close" id="closeNewOsModal">×</button>
-      <div class="new-os-tabs">
-        <div class="new-os-tab active">CheckLists</div>
-        <div class="new-os-tab">Outros Custos</div>
-        <div class="new-os-tab">Assinatura</div>
-        <div class="new-os-tab">Detalhes</div>
-        <div class="new-os-tab active">Geral</div>
-        <div class="new-os-tab">Equipe</div>
-        <div class="new-os-tab">Tarefas</div>
-        <div class="new-os-tab">Segurança</div>
-        <div class="new-os-tab">Fotos</div>
-        <div class="new-os-tab">Anexos</div>
-        <div class="new-os-tab">Documentos</div>
-      </div>
-      <div class="new-os-content">
-        <div class="new-os-title">
-          <div class="new-os-gear">⚙</div>
-          <select class="model-select"><option>Modelos</option></select>
-          <div>Criar OS</div>
-        </div>
-        <div class="new-os-grid">
-          <label>Local</label>
-          <select class="new-select filled" id="newOsLocal"><option>UNIDADE 01- FÁBRICA - MANIP...</option></select>
-          <label>LI</label>
-          <select class="new-select filled" id="newOsLi"><option>REATORES</option></select>
-          <label>TAG</label>
-          <select class="new-select filled" id="newOsTag"><option>R-05</option></select>
-          <label>Tipo de Serviço</label>
-          <select class="new-select"><option></option><option>Corretiva</option><option>Preventiva</option></select>
-          <label>Tipo de Manutenção</label>
-          <select class="new-select"><option></option><option>Mecânica</option><option>Elétrica</option></select>
-          <label>Prioridade</label>
-          <select class="new-select"><option>Baixa</option><option>Média</option><option>Alta</option></select>
-          <label>Data/Hora Programada</label>
-          <input class="new-field" value="dd/mm/aaaa --:--">
-          <label>Duração Estimada</label>
-          <div class="duration-row"><input class="new-field"><span>dias e</span><input class="new-field" value="--:--"><span>hrs</span></div>
-          <label>Executante</label>
-          <select class="new-select"><option></option><option>Manutenção</option><option>Confiabilidade</option></select>
-          <label>Número de Executantes</label>
-          <input class="new-field" value="1">
-          <label>Data e Hora de Início</label>
-          <input class="new-field" value="dd/mm/aaaa --:--">
-          <label>Data e Hora do Término</label>
-          <input class="new-field" value="dd/mm/aaaa --:--">
-        </div>
-        <textarea class="new-area" placeholder="Descrição"></textarea>
-        <textarea class="new-area" placeholder="Comentário"></textarea>
-        <input class="category-input" placeholder="escolha uma categoria">
-        <div class="toggle-list">
-          <div class="toggle-row"><span class="fake-toggle">0</span><span>OS Pendente de Execução</span></div>
-          <div class="toggle-row"><span class="fake-toggle">0</span><span>Máquina parada durante o serviço.</span></div>
-          <div class="toggle-row"><span class="fake-toggle">0</span><span>Abrir outra OS após esta.</span></div>
-          <div class="toggle-row"><span class="fake-toggle">0</span><span>Imprimir esta OS após a Criação.</span></div>
-        </div>
-        <div class="new-os-actions">
-          <button class="new-cancel" id="cancelNewOsModal">Cancelar</button>
-          <button class="new-confirm" id="confirmNewOsModal">Confirmar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="open-os-pop" id="openOsPop">
-    <button class="open-os-close" id="closeOpenOsPop">×</button>
-    <div class="open-os-toolbar">
-      <span class="open-os-tool">▼</span>
-      <span class="open-os-tool">▣</span>
-      <span class="open-os-tool excel">X</span>
-    </div>
-    <div class="open-os-empty">Nenhum registro encontrado</div>
-    <div class="open-os-pager">
-      <span>«</span>
-      <span>»</span>
-      <select class="pager-select"><option>10</option><option>25</option><option>50</option></select>
-    </div>
-  </div>
-
-  <div class="compiled-backdrop" id="compiledChecklist">
-    <div class="compiled-toolbar">
-      <input id="compiledDate" value="14/05/2026">
-      <select><option>Mensal</option><option>Semanal</option><option>Diário</option></select>
-      <button class="compiled-tool-btn">▣</button>
-      <button class="compiled-tool-btn">⟳</button>
-      <button class="compiled-close" id="closeCompiledChecklist">×</button>
-    </div>
-    <div class="compiled-page">
-      <div class="compiled-sheet">
-        <div>
-          <div class="compiled-header">
-            <div class="muriel-box">nova<br>muriel</div>
-            <div class="compiled-title">Compilado de Checklist</div>
-            <div class="compiled-logo">GestMan365</div>
-          </div>
-          <div class="compiled-info">
-            <div><strong>Região:</strong> UNIDADE 01- FÁBRICA</div>
-            <div><strong>Local:</strong> <span id="compiledLocal">ESTOQUE 2 (FARDOS)</span></div>
-            <div><strong>LI:</strong> <span id="compiledLi">CORREDORES</span></div>
-            <div><strong>Equipamento:</strong> <span id="compiledEquipment">CORREDOR GALPÃO CORREDOR CORREDOR - CORR-03</span></div>
-          </div>
-          <div class="compiled-blue-line"></div>
-        </div>
-        <div class="compiled-content">
-          <div class="compiled-note">Não existem checklists preenchidos no período selecionado</div>
-          <div class="compiled-observation">
-            Observações gerais
-            <span class="compiled-eye">◉</span>
-          </div>
-          <div class="compiled-signature">
-            <button>Limpar Assinatura</button>
-            <div class="signature-line"></div>
-            <div>Técnico Responsável</div>
-          </div>
-        </div>
-        <div></div>
-        <div class="compiled-footer">
-          <strong>GestMan365</strong>
-          <span>14/06/26 14:49</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <button class="fab" id="adminFab">▦</button>
+  <div class="toast" id="toast"></div>
 
   <script>
-    const SUPABASE_URL = "https://zkkyiqtzmimcoderjrrm.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_h88SLb98aMdmGCJvEO6yFw_QuJ4I3bI";
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const STORAGE_KEY = "gestman365-admin-v2";
 
-    const fallback = {
-      locations: Array.from({ length: 11 }, (_, index) => ({
-        id: `loc-${index + 1}`,
-        nome: `Linha ${String(index + 1).padStart(2, "0")} - Producao`,
-        tipo: "Linha",
-        cor: "#123f8d",
-        codigo_visual: `L${String(index + 1).padStart(2, "0")}`
-      })),
-      tags: [
-        { id: "tag-mec", codigo: "MEC", nome: "Mecanica", descricao: "Conjuntos mecanicos" },
-        { id: "tag-ele", codigo: "ELE", nome: "Eletrica", descricao: "Comandos e motores" },
-        { id: "tag-util", codigo: "UTIL", nome: "Utilidades", descricao: "Energia e ar comprimido" }
-      ],
-      subTags: [
-        { id: "sub-rol", tag_id: "tag-mec", codigo: "ROL", nome: "Rolamentos" },
-        { id: "sub-mot", tag_id: "tag-ele", codigo: "MOT", nome: "Motor eletrico" },
-        { id: "sub-cmp", tag_id: "tag-util", codigo: "CMP", nome: "Compressor" }
-      ],
-      assets: []
-    };
-
-    const machineCodes = [
-      ["RT-14","ME-01","MF-06","ME-31","RT-01","INK-22","ME-29","INK-20","OS-L01","APA-05","ILUP-01"],
-      ["ILUP-02","INK-21","BL-01","EST-03","MF-01","APA-02","RT-02","ME-03","OS-L02"],
-      ["ILUP-03","INK-30","OS-L03","ME-13","RT-12","MF-07","INK-16","ME-06"],
-      ["APA-09","APA-06","MF-03","ME-11","INK-17","MF-04","INK-06","IMP-01","ME-32","OS-L04","ILUP-04"],
-      ["RT-13","APA-01","ME-07","INK-29","OS-L05","CH-04","ME-09","RT-03","ILUP-05","INK-24","MF-05"],
-      ["ILUP-06","RT-05","INK-26","RT-06","MF-09","ME-35","OS-L06","INK-23","MF-08"],
-      ["OS-L07","APA-04","ILUP-07","MF-14","RT-11","ME-34","INK-27"],
-      ["ILUP-08","OS-L08","ME-04","RT-10","MF-16","RF-01","INK-14","ME-15"],
-      ["ILUP-09","APA-08","INK-19","INK-18","OS-L09","ME-16","RT-07","RT-08","SLE-01"],
-      ["ME-22","ILUP-10","INK-12","MF-10","ME-27","MF-12","OS-L10"],
-      ["APA-10","MF-19","OS-L11","ME-41","INK-31","RT-15","ILUP-11"]
-    ];
-
-    fallback.assets = machineCodes.flatMap((codes, lineIndex) => codes.map((code, machineIndex) => ({
-      id: `asset-${lineIndex + 1}-${machineIndex + 1}`,
-      codigo: code,
-      nome: code,
-      setor: "Linha de producao",
-      local_id: `loc-${lineIndex + 1}`,
-      tag_id: code.startsWith("ME") || code.startsWith("RT") ? "tag-mec" : code.startsWith("ILUP") ? "tag-ele" : "tag-util",
-      sub_tag_id: code.startsWith("ME") ? "sub-rol" : code.startsWith("ILUP") ? "sub-mot" : "sub-cmp",
-      criticidade: code.includes("OS") || code.includes("INK") ? "Alta" : machineIndex % 3 === 0 ? "Media" : "Baixa",
-      status: machineIndex % 9 === 0 ? "Inspecao" : "Operando",
-      responsavel: ["Manutencao", "Producao", "Confiabilidade"][machineIndex % 3],
-      marca: ["MURIEL", "BOSCH", "WEG", "ATLAS", "SIEMENS"][machineIndex % 5],
-      modelo: code,
-      descricao: descriptionFor(code),
-      icone: iconFor(code),
-      alertas: code.includes("INK") ? 1 : code.includes("ME-35") ? 2 : 0
-    })));
-
-    const state = {
+    const emptyState = () => ({
       locations: [],
       tags: [],
-      subTags: [],
+      subtags: [],
       assets: [],
-      selectedAssetId: null,
-      supabaseReady: false
-    };
+      orders: [],
+      checklists: []
+    });
 
-    function iconFor(code) {
-      if (code.startsWith("RT")) return "tank";
-      if (code.startsWith("ME")) return "me";
-      if (code.startsWith("MF") || code.startsWith("APA") || code.startsWith("EST") || code.startsWith("CH")) return "box";
-      if (code.startsWith("INK")) return "funnel";
-      if (code.startsWith("OS") || code.startsWith("BL") || code.startsWith("RF") || code.startsWith("SLE") || code.startsWith("TNL")) return "os";
-      if (code.startsWith("ILUP")) return "flow";
-      return "light";
-    }
+    let state = loadState();
+    let selectedMachineId = null;
 
-    function descriptionFor(code) {
-      if (code.startsWith("RT")) return "MAQUINA DE ROTULAGEM";
-      if (code.startsWith("ME")) return "MODULO DE ENVASE";
-      if (code.startsWith("MF")) return "MODULO DE FECHAMENTO";
-      if (code.startsWith("INK")) return "SISTEMA DE INJECAO";
-      if (code.startsWith("OS")) return "ESTACAO DE OPERACAO";
-      if (code.startsWith("ILUP")) return "ILUMINACAO DE LINHA";
-      if (code.startsWith("APA")) return "APLICADOR AUTOMATICO";
-      return "EQUIPAMENTO INDUSTRIAL";
-    }
-
-    function newId(prefix) {
-      return `${prefix}-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
-    }
-
-    function byId(collection, id) {
-      return collection.find(item => item.id === id);
-    }
-
-    function label(collection, id, field = "nome") {
-      return byId(collection, id)?.[field] || "";
-    }
-
-    function pillClass(value) {
-      if (["Alta", "Em manutencao", "Critica"].includes(value)) return "red";
-      if (["Media", "Inspecao"].includes(value)) return "orange";
-      return "green";
-    }
-
-    function iconHtml(type) {
-      if (type === "tank") return `<div class="ico ico-tank"></div>`;
-      if (type === "me") return `<div class="ico ico-me"><span></span><span></span><span></span></div>`;
-      if (type === "box") return `<div class="ico ico-box"></div>`;
-      if (type === "funnel") return `<div class="ico ico-funnel"></div>`;
-      if (type === "os") return `<div class="ico-os">OS</div>`;
-      if (type === "flow") return `<div class="ico ico-flow"></div>`;
-      return `<div class="ico ico-light"></div>`;
-    }
-
-    function renderSelects() {
-      const locationOptions = [`<option value="">Sem local</option>`].concat(state.locations.map(item => `<option value="${item.id}">${item.nome}</option>`)).join("");
-      const tagOptions = [`<option value="">Sem tag</option>`].concat(state.tags.map(item => `<option value="${item.id}">${item.codigo} - ${item.nome}</option>`)).join("");
-      const subTagOptions = [`<option value="">Sem subtag</option>`].concat(state.subTags.map(item => `<option value="${item.id}">${item.codigo} - ${item.nome}</option>`)).join("");
-      document.getElementById("assetLocation").innerHTML = locationOptions;
-      document.getElementById("assetTag").innerHTML = tagOptions;
-      document.getElementById("assetSubTag").innerHTML = subTagOptions;
-      document.getElementById("subTagParent").innerHTML = tagOptions;
-    }
-
-    function renderOverview() {
-      const term = document.getElementById("searchInput").value.toLowerCase();
-      const region = document.getElementById("regionFilter").value;
-      const locations = state.locations.filter(location => {
-        const regionOk = !region || location.nome === region || location.tipo === region;
-        const termOk = !term || location.nome.toLowerCase().includes(term) || state.assets.some(asset => asset.local_id === location.id && `${asset.codigo} ${asset.nome}`.toLowerCase().includes(term));
-        return regionOk && termOk;
-      });
-
-      document.getElementById("locationCount").textContent = locations.length;
-      document.getElementById("lineGrid").innerHTML = locations.map(location => {
-        const assets = state.assets.filter(asset => asset.local_id === location.id);
-        const alertCount = assets.reduce((sum, asset) => sum + Number(asset.alertas || (asset.criticidade === "Alta" ? 1 : 0)), 0);
-        return `
-          <article class="line-card">
-            <div class="line-header">
-              <div class="pin-icon">⌖</div>
-              <div>${location.nome}</div>
-              <div class="map-icon"><span class="alert-dot">${alertCount}</span></div>
-            </div>
-            <div class="line-body">
-              <div class="line-code">${location.codigo_visual || location.nome.replace(/[^0-9]/g, "") || location.tipo}</div>
-              <div class="line-type">LINHA DE PRODUCAO</div>
-              <div class="machine-row">
-                ${assets.map(asset => `
-                  <button class="machine" data-asset-id="${asset.id}" title="${asset.codigo} - ${asset.nome}">
-                    <span class="machine-box">
-                      ${asset.alertas ? `<span class="machine-alert">${asset.alertas}</span>` : ""}
-                      ${iconHtml(asset.icone || iconFor(asset.codigo))}
-                    </span>
-                    <span class="machine-name">${asset.codigo}</span>
-                  </button>
-                `).join("")}
-              </div>
-            </div>
-          </article>
-        `;
-      }).join("");
-
-      document.querySelectorAll(".machine").forEach(button => {
-        button.addEventListener("click", event => openMachineMenu(button.dataset.assetId, event));
-        button.addEventListener("mouseenter", event => showMachineTooltip(button.dataset.assetId, event));
-        button.addEventListener("mousemove", event => positionMachineTooltip(event));
-        button.addEventListener("mouseleave", hideMachineTooltip);
-      });
-    }
-
-    function renderAdmin() {
-      document.getElementById("assetRows").innerHTML = state.assets.slice(0, 120).map(asset => `
-        <tr>
-          <td>${asset.codigo}</td>
-          <td>${asset.nome}</td>
-          <td>${label(state.locations, asset.local_id) || "-"}</td>
-          <td>${label(state.tags, asset.tag_id, "codigo") || "-"}</td>
-          <td>${label(state.subTags, asset.sub_tag_id, "codigo") || "-"}</td>
-          <td><span class="pill ${pillClass(asset.status)}">${asset.status}</span></td>
-        </tr>
-      `).join("");
-    }
-
-    function render() {
-      renderSelects();
-      renderOverview();
-      renderAdmin();
-    }
-
-    function openDetails(assetId) {
-      const asset = byId(state.assets, assetId);
-      if (!asset) return;
-      document.getElementById("detailsTitle").textContent = `${asset.codigo} - ${asset.nome}`;
-      document.getElementById("detailsBody").innerHTML = `
-        <div><span class="pill ${pillClass(asset.criticidade)}">${asset.criticidade}</span> <span class="pill ${pillClass(asset.status)}">${asset.status}</span></div>
-        <div><strong>Local:</strong> ${label(state.locations, asset.local_id) || "-"}</div>
-        <div><strong>Tag:</strong> ${label(state.tags, asset.tag_id, "codigo") || "-"} / ${label(state.subTags, asset.sub_tag_id, "codigo") || "-"}</div>
-        <div><strong>Responsavel:</strong> ${asset.responsavel || "-"}</div>
-        <div><strong>MTTR estimado:</strong> ${(asset.criticidade === "Alta" ? 7.4 : 4.2).toFixed(1)}h</div>
-        <div><strong>MTBF estimado:</strong> ${asset.criticidade === "Alta" ? 116 : 184}h</div>
-      `;
-      document.getElementById("detailsPanel").classList.add("open");
-    }
-
-    function openMachineMenu(assetId, event) {
-      event.stopPropagation();
-      state.selectedAssetId = assetId;
-      const menu = document.getElementById("machineMenu");
-      const rect = event.currentTarget.getBoundingClientRect();
-      const left = Math.min(window.innerWidth - 260, rect.left + 44);
-      const top = Math.min(window.innerHeight - 260, rect.top + 8);
-      menu.style.left = `${Math.max(20, left)}px`;
-      menu.style.top = `${Math.max(70, top)}px`;
-      menu.classList.add("open");
-    }
-
-    function showMachineTooltip(assetId, event) {
-      const asset = byId(state.assets, assetId);
-      if (!asset) return;
-      const tooltip = document.getElementById("machineTooltip");
-      tooltip.innerHTML = `
-        <div class="tooltip-head">
-          <span class="tooltip-mini">◆</span>
-          <span class="tooltip-title">${asset.codigo}</span>
-        </div>
-        <div class="tooltip-head">
-          <span class="tooltip-mini">⚙</span>
-          <span class="tooltip-title">${asset.setor || "MAQUINAS"}</span>
-        </div>
-        <div class="tooltip-line"></div>
-        <div class="tooltip-body">
-          <div>Marca: ${asset.marca || "MURIEL"}</div>
-          <div>Modelo: ${asset.modelo || asset.codigo}</div>
-          <div>${asset.descricao || descriptionFor(asset.codigo)}</div>
-          <div>${asset.status || "Operante"}</div>
-        </div>
-      `;
-      tooltip.classList.add("open");
-      positionMachineTooltip(event);
-    }
-
-    function positionMachineTooltip(event) {
-      const tooltip = document.getElementById("machineTooltip");
-      if (!tooltip.classList.contains("open")) return;
-      const width = 216;
-      const height = tooltip.offsetHeight || 142;
-      const left = Math.min(window.innerWidth - width - 8, Math.max(8, event.clientX - width / 2));
-      const top = Math.max(58, event.clientY - height - 18);
-      tooltip.style.left = `${left}px`;
-      tooltip.style.top = `${top}px`;
-    }
-
-    function hideMachineTooltip() {
-      document.getElementById("machineTooltip").classList.remove("open");
-    }
-
-    function closeMachineMenu() {
-      document.getElementById("machineMenu").classList.remove("open");
-    }
-
-    function runMachineAction(action) {
-      const asset = byId(state.assets, state.selectedAssetId);
-      if (!asset) return;
-      closeMachineMenu();
-      if (action === "checklists") {
-        openCheckModal(asset);
-        return;
-      }
-      if (action === "nova-os") {
-        openNewOsModal(asset);
-        return;
-      }
-      if (action === "historico") {
-        openOsModal(asset);
-        return;
-      }
-      if (action === "abertas") {
-        openOsAbertasPop();
-        return;
-      }
-      if (action === "compilado") {
-        openCompiledChecklist(asset);
-        return;
-      }
-      const content = {
-        "checklists": `
-          <div><span class="pill green">Checklist diario</span> <span class="pill orange">Inspecao semanal</span></div>
-          <div><strong>Itens principais:</strong> limpeza, ruído, temperatura, vibracao e seguranca.</div>
-          <div><strong>Ultima execucao:</strong> hoje, 08:20</div>
-        `,
-        "nova-os": `
-          <div><span class="pill red">Nova OS</span></div>
-          <div><strong>Ativo:</strong> ${asset.codigo} - ${asset.nome}</div>
-          <div><strong>Tipo sugerido:</strong> ${asset.criticidade === "Alta" ? "Corretiva urgente" : "Corretiva planejada"}</div>
-          <div><strong>Prioridade:</strong> ${asset.criticidade}</div>
-        `,
-        "historico": `
-          <div><strong>Historico de OS's</strong></div>
-          <div>OS-1048 - Ajuste mecanico - Concluida</div>
-          <div>OS-1032 - Inspecao eletrica - Concluida</div>
-          <div>OS-1019 - Troca de componente - Concluida</div>
-        `,
-        "abertas": `
-          <div><strong>OS's abertas</strong></div>
-          <div>${asset.alertas ? "OS-1051 - Verificar alarme operacional" : "Nenhuma OS aberta para este ativo."}</div>
-        `,
-        "pendencias": `
-          <div><strong>Pendencias abertas</strong></div>
-          <div>${asset.criticidade === "Alta" ? "Validar causa raiz e registrar plano de acao." : "Sem pendencias criticas."}</div>
-        `,
-        "compilado": `
-          <div><strong>Compilado de Checklist</strong></div>
-          <div>Conformidade: ${asset.criticidade === "Alta" ? "82%" : "96%"}</div>
-          <div>Itens reprovados: ${asset.criticidade === "Alta" ? "3" : "0"}</div>
-        `,
-        "especialista": `
-          <div><span class="pill green">Especialista GestMan365</span></div>
-          <div>Analise sugerida: verificar historico de falhas, alarmes recentes e padrao de repeticao deste ativo.</div>
-          <div>Proxima pergunta: qual sintoma o operador observou?</div>
-        `
-      };
-
-      const titles = {
-        "checklists": "CheckLists",
-        "nova-os": "Nova OS",
-        "historico": "Historico de OS's",
-        "abertas": "OS's Abertas",
-        "pendencias": "Pendencias Abertas",
-        "compilado": "Compilado de Checklist",
-        "especialista": "Especialista GestMan365"
-      };
-
-      document.getElementById("detailsTitle").textContent = `${titles[action]} - ${asset.codigo}`;
-      document.getElementById("detailsBody").innerHTML = `
-        <div><strong>${asset.codigo} - ${asset.nome}</strong></div>
-        <div><span class="pill ${pillClass(asset.criticidade)}">${asset.criticidade}</span> <span class="pill ${pillClass(asset.status)}">${asset.status}</span></div>
-        ${content[action]}
-      `;
-      document.getElementById("detailsPanel").classList.add("open");
-    }
-
-    function openOsModal(asset) {
-      document.getElementById("osTag").value = asset.codigo;
-      document.getElementById("osResults").classList.remove("open");
-      document.getElementById("osRows").innerHTML = "";
-      document.getElementById("osModal").classList.add("open");
-    }
-
-    function openCheckModal(asset) {
-      const localName = label(state.locations, asset.local_id) || "MANIPULAÇÃO";
-      document.getElementById("checkLocal").innerHTML = `<option>${localName.toUpperCase()}</option><option>MANIPULAÇÃO</option><option>PRODUÇÃO</option><option>UTILIDADES</option>`;
-      document.getElementById("checkLi").innerHTML = `<option>${asset.setor || "REATORES"}</option><option>REATORES</option><option>ENVASE</option><option>ROTULAGEM</option>`;
-      document.getElementById("checkTag").innerHTML = `<option>${asset.codigo}</option>`;
-      const hasChecklist = asset.criticidade === "Alta";
-      document.getElementById("checkRows").innerHTML = hasChecklist
-        ? `<tr><td>CK-01</td><td>Inspecao operacional ${asset.codigo}</td><td>14/06/2026 08:20</td></tr>`
-        : `<tr><td colspan="3">Nenhum checklist vinculado</td></tr>`;
-      document.getElementById("checkModal").classList.add("open");
-    }
-
-    function closeCheckModal() {
-      document.getElementById("checkModal").classList.remove("open");
-    }
-
-    function openNewOsModal(asset) {
-      const localName = label(state.locations, asset.local_id) || "UNIDADE 01- FÁBRICA - MANIP...";
-      document.getElementById("newOsLocal").innerHTML = `<option>${localName.toUpperCase()}</option>`;
-      document.getElementById("newOsLi").innerHTML = `<option>${asset.setor || "REATORES"}</option>`;
-      document.getElementById("newOsTag").innerHTML = `<option>${asset.codigo}</option>`;
-      document.getElementById("newOsModal").classList.add("open");
-    }
-
-    function closeNewOsModal() {
-      document.getElementById("newOsModal").classList.remove("open");
-    }
-
-    function confirmNewOsModal() {
-      closeNewOsModal();
-      const asset = byId(state.assets, state.selectedAssetId);
-      if (!asset) return;
-      document.getElementById("detailsTitle").textContent = `Nova OS - ${asset.codigo}`;
-      document.getElementById("detailsBody").innerHTML = `
-        <div><span class="pill green">OS criada em rascunho</span></div>
-        <div><strong>Ativo:</strong> ${asset.codigo} - ${asset.nome}</div>
-        <div><strong>Status:</strong> aguardando confirmação de execução.</div>
-      `;
-      document.getElementById("detailsPanel").classList.add("open");
-    }
-
-    function openOsAbertasPop() {
-      const menu = document.getElementById("machineMenu");
-      const pop = document.getElementById("openOsPop");
-      const menuLeft = Number.parseInt(menu.style.left || "120", 10);
-      const menuTop = Number.parseInt(menu.style.top || "120", 10);
-      pop.style.left = `${Math.min(window.innerWidth - 150, Math.max(20, menuLeft + 34))}px`;
-      pop.style.top = `${Math.min(window.innerHeight - 120, Math.max(60, menuTop + 8))}px`;
-      closeMachineMenu();
-      pop.classList.add("open");
-    }
-
-    function closeOsAbertasPop() {
-      document.getElementById("openOsPop").classList.remove("open");
-    }
-
-    function openCompiledChecklist(asset) {
-      document.getElementById("compiledLocal").textContent = label(state.locations, asset.local_id) || "UNIDADE 01- FÁBRICA";
-      document.getElementById("compiledLi").textContent = asset.setor || "CORREDORES";
-      document.getElementById("compiledEquipment").textContent = `${asset.nome} - ${asset.codigo}`;
-      closeMachineMenu();
-      document.getElementById("compiledChecklist").classList.add("open");
-    }
-
-    function closeCompiledChecklist() {
-      document.getElementById("compiledChecklist").classList.remove("open");
-    }
-
-    function closeOsModal() {
-      document.getElementById("osModal").classList.remove("open");
-    }
-
-    function submitOsList() {
-      const tag = document.getElementById("osTag").value || "RT-14";
-      const rows = [
-        ["OS-1048", tag, "Ajuste mecanico e reaperto geral", "Concluida", "Manutencao", "16/03/2026"],
-        ["OS-1092", tag, "Inspecao preventiva de seguranca", "Concluida", "Confiabilidade", "28/04/2026"],
-        ["OS-1137", tag, "Verificacao de ruido e vibracao", "Aberta", "Manutencao", "12/06/2026"]
-      ];
-      document.getElementById("osRows").innerHTML = rows.map(row => `
-        <tr>
-          <td>${row[0]}</td>
-          <td>${row[1]}</td>
-          <td>${row[2]}</td>
-          <td><span class="pill ${row[3] === "Aberta" ? "orange" : "green"}">${row[3]}</span></td>
-          <td>${row[4]}</td>
-          <td>${row[5]}</td>
-        </tr>
-      `).join("");
-      document.getElementById("osResults").classList.add("open");
-    }
-
-    async function loadTable(name, fallbackRows) {
-      const { data, error } = await client.from(name).select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data?.length ? data : fallbackRows;
-    }
-
-    async function refresh() {
-      document.getElementById("connectionStatus").textContent = "Conectando...";
+    function loadState() {
       try {
-        state.locations = await loadTable("locais", fallback.locations);
-        state.tags = await loadTable("tags", fallback.tags);
-        state.subTags = await loadTable("sub_tags", fallback.subTags);
-        state.assets = await loadTable("ativos", fallback.assets);
-        state.assets = state.assets.map(asset => ({
-          ...asset,
-          icone: asset.icone || iconFor(asset.codigo),
-          alertas: asset.alertas || (asset.criticidade === "Alta" ? 1 : 0),
-          marca: asset.marca || "MURIEL",
-          modelo: asset.modelo || asset.codigo,
-          descricao: asset.descricao || descriptionFor(asset.codigo)
-        }));
-        state.supabaseReady = true;
-        document.getElementById("connectionStatus").textContent = "Supabase online";
-        render();
-      } catch (error) {
-        state.locations = [...fallback.locations];
-        state.tags = [...fallback.tags];
-        state.subTags = [...fallback.subTags];
-        state.assets = [...fallback.assets];
-        state.supabaseReady = false;
-        document.getElementById("connectionStatus").textContent = "Modo demonstracao";
-        render();
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? { ...emptyState(), ...JSON.parse(saved) } : emptyState();
+      } catch {
+        return emptyState();
       }
     }
 
-    async function insertOrMemory(table, payload, collection, prefix) {
-      Object.keys(payload).forEach(key => {
-        if (payload[key] === "") payload[key] = null;
-      });
-      if (state.supabaseReady) {
-        const { error } = await client.from(table).insert(payload);
-        if (error) {
-          alert(error.message);
-          return;
-        }
-        await refresh();
-        return;
-      }
-      collection.unshift({ id: newId(prefix), ...payload });
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function uid(prefix) {
+      return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+    }
+
+    function $(id) { return document.getElementById(id); }
+    function byId(list, id) { return list.find(item => item.id === id); }
+    function value(id) { return $(id).value.trim(); }
+    function numberValue(id, fallback = 0) { return Number($(id).value || fallback); }
+
+    function showToast(message) {
+      $("toast").textContent = message;
+      $("toast").classList.add("open");
+      setTimeout(() => $("toast").classList.remove("open"), 2200);
+    }
+
+    function setView(view) {
+      document.querySelectorAll(".view").forEach(section => section.classList.toggle("active", section.id === view));
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === view));
       render();
     }
 
-    document.getElementById("reloadBtn").addEventListener("click", refresh);
-    document.getElementById("searchInput").addEventListener("input", renderOverview);
-    document.getElementById("regionFilter").addEventListener("change", renderOverview);
-    document.getElementById("closeDetails").addEventListener("click", () => document.getElementById("detailsPanel").classList.remove("open"));
-    document.getElementById("closeOsModal").addEventListener("click", closeOsModal);
-    document.getElementById("submitOsList").addEventListener("click", submitOsList);
-    document.getElementById("osModal").addEventListener("click", event => {
-      if (event.target.id === "osModal") closeOsModal();
-    });
-    document.getElementById("closeCheckModal").addEventListener("click", closeCheckModal);
-    document.getElementById("cancelCheckModal").addEventListener("click", closeCheckModal);
-    document.getElementById("checkModal").addEventListener("click", event => {
-      if (event.target.id === "checkModal") closeCheckModal();
-    });
-    document.getElementById("closeNewOsModal").addEventListener("click", closeNewOsModal);
-    document.getElementById("cancelNewOsModal").addEventListener("click", closeNewOsModal);
-    document.getElementById("confirmNewOsModal").addEventListener("click", confirmNewOsModal);
-    document.getElementById("newOsModal").addEventListener("click", event => {
-      if (event.target.id === "newOsModal") closeNewOsModal();
-    });
-    document.getElementById("closeOpenOsPop").addEventListener("click", closeOsAbertasPop);
-    document.getElementById("closeCompiledChecklist").addEventListener("click", closeCompiledChecklist);
-    document.addEventListener("click", event => {
-      if (!event.target.closest("#openOsPop") && !event.target.closest("[data-action='abertas']")) closeOsAbertasPop();
-    });
-    document.getElementById("closeMachineMenu").addEventListener("click", closeMachineMenu);
-    document.getElementById("machineMenu").addEventListener("click", event => {
-      const item = event.target.closest("[data-action]");
-      if (item) runMachineAction(item.dataset.action);
-    });
-    document.addEventListener("click", event => {
-      if (!event.target.closest(".machine-menu") && !event.target.closest(".machine")) closeMachineMenu();
-    });
-    document.getElementById("adminFab").addEventListener("click", () => switchView("admin"));
-
-    document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => switchView(tab.dataset.view)));
-
-    function switchView(view) {
-      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === view));
-      document.getElementById("overview").style.display = view === "overview" ? "block" : "none";
-      document.getElementById("admin").classList.toggle("active", view === "admin");
+    function tagClass(value) {
+      if (value === "Alta" || value === "Em manutenção" || value === "Aberta") return "danger";
+      if (value === "Média" || value === "Inspeção" || value === "Planejada") return "warn";
+      return "ok";
     }
 
-    document.getElementById("locationForm").addEventListener("submit", async event => {
+    function tag(value) {
+      return `<span class="tag ${tagClass(value)}">${value || "-"}</span>`;
+    }
+
+    function locationName(id) { return byId(state.locations, id)?.name || "-"; }
+    function tagName(id) { const item = byId(state.tags, id); return item ? `${item.code}` : "-"; }
+    function subtagName(id) { const item = byId(state.subtags, id); return item ? `${item.code}` : "-"; }
+    function machineName(id) { const item = byId(state.assets, id); return item ? `${item.code} - ${item.name}` : "-"; }
+
+    function calcMetrics() {
+      const failures = state.orders.filter(order => order.status !== "Cancelada").length;
+      const totalRepair = state.orders.reduce((sum, order) => sum + Number(order.mttr || 0), 0);
+      const mttr = failures ? totalRepair / failures : 0;
+      const mtbf = state.assets.length ? Math.max(0, 168 - failures * 6 + state.assets.length * 4) : 0;
+      const availability = mtbf + mttr ? (mtbf / (mtbf + mttr)) * 100 : 0;
+      return { mttr, mtbf, availability };
+    }
+
+    function renderDashboard() {
+      const { mttr, mtbf, availability } = calcMetrics();
+      $("mttrMetric").textContent = `${mttr.toFixed(1)}h`;
+      $("mtbfMetric").textContent = `${mtbf.toFixed(0)}h`;
+      $("availabilityMetric").textContent = `${availability.toFixed(1)}%`;
+      $("assetMetric").textContent = state.assets.length;
+      renderTrendChart(mttr, mtbf);
+      renderStatusBars();
+      renderCriticalityBars();
+      $("nextSteps").innerHTML = state.assets.length
+        ? `Seu parque já tem ${state.assets.length} máquina(s). Continue criando OS e checklists para alimentar MTTR e MTBF.`
+        : `Comece criando locais, depois cadastre as máquinas e posicione cada uma no mapa industrial.`;
+    }
+
+    function renderTrendChart(mttr, mtbf) {
+      const mttrPoints = [mttr + 1.8, mttr + 1.2, mttr + .9, mttr + .4, mttr + .2, mttr].map(v => Math.max(0, v));
+      const mtbfPoints = [mtbf * .72, mtbf * .78, mtbf * .84, mtbf * .9, mtbf * .95, mtbf].map(v => Math.max(0, v));
+      const max = Math.max(10, ...mttrPoints, ...mtbfPoints);
+      const poly = arr => arr.map((v, i) => `${40 + i * 110},${180 - (v / max) * 145}`).join(" ");
+      $("trendChart").innerHTML = `
+        <svg viewBox="0 0 650 210" aria-label="Gráfico MTTR e MTBF">
+          <line x1="40" y1="180" x2="620" y2="180" stroke="rgba(255,255,255,.25)"/>
+          <line x1="40" y1="30" x2="40" y2="180" stroke="rgba(255,255,255,.25)"/>
+          <polyline points="${poly(mtbfPoints)}" fill="none" stroke="#ffffff" stroke-width="4"/>
+          <polyline points="${poly(mttrPoints)}" fill="none" stroke="#ff8a4c" stroke-width="4"/>
+          <text x="460" y="28" fill="#fff">MTBF</text>
+          <text x="540" y="28" fill="#ff8a4c">MTTR</text>
+          <text x="38" y="202" fill="#aebfdf">últimos períodos</text>
+        </svg>`;
+    }
+
+    function renderStatusBars() {
+      const statuses = ["Aberta", "Planejada", "Concluída"];
+      const max = Math.max(1, ...statuses.map(status => state.orders.filter(order => order.status === status).length));
+      $("statusBars").innerHTML = statuses.map(status => {
+        const count = state.orders.filter(order => order.status === status).length;
+        return `<div class="bar-row"><strong>${status}</strong><div class="bar-track"><div class="bar" style="width:${(count / max) * 100}%"></div></div><span>${count}</span></div>`;
+      }).join("");
+    }
+
+    function renderCriticalityBars() {
+      const items = ["Alta", "Média", "Baixa"];
+      const max = Math.max(1, ...items.map(item => state.assets.filter(asset => asset.criticality === item).length));
+      $("criticalityBars").innerHTML = items.map(item => {
+        const count = state.assets.filter(asset => asset.criticality === item).length;
+        return `<div class="bar-row"><strong>${item}</strong><div class="bar-track"><div class="bar" style="width:${(count / max) * 100}%"></div></div><span>${count}</span></div>`;
+      }).join("");
+    }
+
+    function renderMap() {
+      const q = $("globalSearch").value.toLowerCase();
+      const map = $("industrialMap");
+      if (!state.locations.length && !state.assets.length) {
+        map.innerHTML = `<div class="empty">Mapa vazio. Crie locais e máquinas para montar o parque industrial.</div>`;
+        $("mapDetails").innerHTML = `<strong>Nenhuma máquina selecionada</strong><span class="muted">Clique em uma máquina no mapa para ver ações.</span>`;
+        return;
+      }
+
+      const zones = state.locations.map(location => `
+        <div class="map-zone" style="left:${location.x}%;top:${location.y}%;width:${location.w}%;height:${location.h}%;border-color:${location.color};">
+          <div class="map-zone-title">${location.name}</div>
+        </div>
+      `).join("");
+
+      const machines = state.assets
+        .filter(asset => !q || `${asset.code} ${asset.name} ${locationName(asset.locationId)}`.toLowerCase().includes(q))
+        .map(asset => `
+          <button class="machine-node" data-machine="${asset.id}" style="left:${asset.x}%;top:${asset.y}%;">
+            <span class="machine-icon">${asset.icon || "ME"}${asset.criticality === "Alta" ? `<span class="machine-alert">!</span>` : ""}</span>
+            <span class="machine-label">${asset.code}</span>
+          </button>
+        `).join("");
+
+      map.innerHTML = zones + machines;
+      document.querySelectorAll("[data-machine]").forEach(button => {
+        button.addEventListener("click", event => openMachineMenu(event, button.dataset.machine));
+        button.addEventListener("mouseenter", () => showMachineDetails(button.dataset.machine));
+      });
+    }
+
+    function showMachineDetails(id) {
+      const asset = byId(state.assets, id);
+      if (!asset) return;
+      $("mapDetails").innerHTML = `
+        <strong>${asset.code} - ${asset.name}</strong>
+        <span>${tag(asset.criticality)} ${tag(asset.status)}</span>
+        <span>Local: ${locationName(asset.locationId)}</span>
+        <span>Tag: ${tagName(asset.tagId)} / ${subtagName(asset.subtagId)}</span>
+        <span>Marca: ${asset.brand || "-"}</span>
+        <span>Modelo: ${asset.model || "-"}</span>
+      `;
+    }
+
+    function fillSelects() {
+      const locOptions = [`<option value="">Sem local</option>`].concat(state.locations.map(item => `<option value="${item.id}">${item.name}</option>`)).join("");
+      $("assetLocation").innerHTML = locOptions;
+      const tagOptions = [`<option value="">Sem tag</option>`].concat(state.tags.map(item => `<option value="${item.id}">${item.code} - ${item.name}</option>`)).join("");
+      $("assetTag").innerHTML = tagOptions;
+      $("subtagParent").innerHTML = tagOptions;
+      $("assetSubtag").innerHTML = [`<option value="">Sem subtag</option>`].concat(state.subtags.map(item => `<option value="${item.id}">${item.code} - ${item.name}</option>`)).join("");
+    }
+
+    function renderTables() {
+      const q = $("globalSearch").value.toLowerCase();
+      const filter = text => !q || text.toLowerCase().includes(q);
+
+      $("assetRows").innerHTML = state.assets.filter(asset => filter(`${asset.code} ${asset.name} ${locationName(asset.locationId)}`)).map(asset => `
+        <tr><td>${asset.code}</td><td>${asset.name}</td><td>${locationName(asset.locationId)}</td><td>${tag(asset.criticality)}</td><td>${tag(asset.status)}</td><td class="actions"><button class="btn" onclick="editAsset('${asset.id}')">Editar</button><button class="btn danger" onclick="deleteAsset('${asset.id}')">Excluir</button></td></tr>
+      `).join("") || `<tr><td colspan="6" class="empty">Nenhuma máquina criada.</td></tr>`;
+
+      $("locationRows").innerHTML = state.locations.map(item => `
+        <tr><td>${item.name}</td><td>${item.type}</td><td>${item.x}% / ${item.y}%</td><td>${item.w}% x ${item.h}%</td><td class="actions"><button class="btn" onclick="editLocation('${item.id}')">Editar</button><button class="btn danger" onclick="deleteLocation('${item.id}')">Excluir</button></td></tr>
+      `).join("") || `<tr><td colspan="5" class="empty">Nenhum local criado.</td></tr>`;
+
+      const tagRows = state.tags.map(item => `
+        <tr><td>Tag</td><td>${item.code}</td><td>${item.name}</td><td>${item.description || "-"}</td><td class="actions"><button class="btn" onclick="editTag('${item.id}')">Editar</button><button class="btn danger" onclick="deleteTag('${item.id}')">Excluir</button></td></tr>
+      `).join("");
+      const subRows = state.subtags.map(item => `
+        <tr><td>Subtag</td><td>${item.code}</td><td>${item.name}</td><td>Pai: ${tagName(item.parentId)}</td><td class="actions"><button class="btn" onclick="editSubtag('${item.id}')">Editar</button><button class="btn danger" onclick="deleteSubtag('${item.id}')">Excluir</button></td></tr>
+      `).join("");
+      $("tagRows").innerHTML = tagRows + subRows || `<tr><td colspan="5" class="empty">Nenhuma tag criada.</td></tr>`;
+
+      $("orderRows").innerHTML = state.orders.map(order => `
+        <tr><td>${order.number}</td><td>${machineName(order.assetId)}</td><td>${order.type}</td><td>${tag(order.priority)}</td><td>${tag(order.status)}</td><td>${order.mttr || 0}h</td><td class="actions"><button class="btn" onclick="editOrder('${order.id}')">Editar</button><button class="btn danger" onclick="deleteOrder('${order.id}')">Excluir</button></td></tr>
+      `).join("") || `<tr><td colspan="7" class="empty">Nenhuma OS criada.</td></tr>`;
+
+      $("checklistRows").innerHTML = state.checklists.map(item => `
+        <tr><td>${item.code}</td><td>${machineName(item.assetId)}</td><td>${item.name}</td><td>${item.lastFill || "-"}</td><td class="actions"><button class="btn" onclick="editChecklist('${item.id}')">Editar</button><button class="btn danger" onclick="deleteChecklist('${item.id}')">Excluir</button></td></tr>
+      `).join("") || `<tr><td colspan="5" class="empty">Nenhum checklist criado.</td></tr>`;
+    }
+
+    function render() {
+      fillSelects();
+      renderDashboard();
+      renderMap();
+      renderTables();
+    }
+
+    function resetAssetForm() {
+      $("assetForm").reset();
+      $("assetId").value = "";
+      $("assetX").value = 50;
+      $("assetY").value = 50;
+      $("assetFormTitle").textContent = "Criar máquina";
+    }
+
+    function resetLocationForm() {
+      $("locationForm").reset();
+      $("locationId").value = "";
+      $("locationColor").value = "#123f8d";
+      $("locationX").value = 5;
+      $("locationY").value = 8;
+      $("locationW").value = 38;
+      $("locationH").value = 28;
+      $("locationFormTitle").textContent = "Criar local";
+    }
+
+    function resetTagForm() { $("tagForm").reset(); $("tagId").value = ""; $("tagFormTitle").textContent = "Criar tag/subtag"; }
+    function resetSubtagForm() { $("subtagForm").reset(); $("subtagId").value = ""; }
+
+    function openMachineMenu(event, id) {
+      selectedMachineId = id;
+      showMachineDetails(id);
+      const menu = $("machineMenu");
+      menu.style.left = `${Math.min(window.innerWidth - 260, event.clientX + 8)}px`;
+      menu.style.top = `${Math.min(window.innerHeight - 260, event.clientY + 8)}px`;
+      menu.classList.add("open");
+    }
+
+    function closeMachineMenu() {
+      $("machineMenu").classList.remove("open");
+    }
+
+    function openModal(title, html, large = false) {
+      $("genericTitle").textContent = title;
+      $("genericBody").innerHTML = html;
+      $("genericModalBox").classList.toggle("large", large);
+      $("genericModal").classList.add("open");
+    }
+
+    function closeModal() { $("genericModal").classList.remove("open"); }
+
+    function openOrderModal(assetId = "") {
+      const machines = state.assets.map(asset => `<option value="${asset.id}" ${asset.id === assetId ? "selected" : ""}>${asset.code} - ${asset.name}</option>`).join("");
+      openModal("Criar OS", `
+        <form class="form" id="orderForm">
+          <label>Máquina <select class="field" id="orderAsset">${machines || `<option value="">Cadastre uma máquina</option>`}</select></label>
+          <label>Tipo <select class="field" id="orderType"><option>Corretiva</option><option>Preventiva</option><option>Inspeção</option></select></label>
+          <label>Prioridade <select class="field" id="orderPriority"><option>Baixa</option><option>Média</option><option>Alta</option></select></label>
+          <label>Status <select class="field" id="orderStatus"><option>Aberta</option><option>Planejada</option><option>Concluída</option></select></label>
+          <label>MTTR estimado (h) <input class="field" id="orderMttr" type="number" value="4"></label>
+          <label class="full">Descrição <textarea class="field" id="orderDescription"></textarea></label>
+          <div class="full toolbar"><button class="btn primary" type="submit">Salvar OS</button></div>
+        </form>
+      `);
+      $("orderForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.orders.unshift({
+          id: uid("os"),
+          number: `OS-${String(state.orders.length + 1).padStart(4, "0")}`,
+          assetId: $("orderAsset").value,
+          type: $("orderType").value,
+          priority: $("orderPriority").value,
+          status: $("orderStatus").value,
+          mttr: Number($("orderMttr").value || 0),
+          description: $("orderDescription").value
+        });
+        saveState(); closeModal(); render(); showToast("OS criada.");
+      });
+    }
+
+    function openChecklistModal(assetId = "") {
+      const machines = state.assets.map(asset => `<option value="${asset.id}" ${asset.id === assetId ? "selected" : ""}>${asset.code} - ${asset.name}</option>`).join("");
+      openModal("CheckLists Disponíveis", `
+        <form class="form" id="checkForm">
+          <label>Máquina <select class="field" id="checkAsset">${machines || `<option value="">Cadastre uma máquina</option>`}</select></label>
+          <label>ID <input class="field" id="checkCode" value="CK-${String(state.checklists.length + 1).padStart(2, "0")}"></label>
+          <label class="full">Nome <input class="field" id="checkName" placeholder="Inspeção operacional"></label>
+          <label class="full">Último preenchimento <input class="field" id="checkLast" placeholder="14/06/2026 08:20"></label>
+          <div class="full toolbar"><button class="btn primary" type="submit">Salvar checklist</button></div>
+        </form>
+      `);
+      $("checkForm").addEventListener("submit", event => {
+        event.preventDefault();
+        state.checklists.unshift({ id: uid("ck"), assetId: $("checkAsset").value, code: $("checkCode").value, name: $("checkName").value || "Checklist operacional", lastFill: $("checkLast").value });
+        saveState(); closeModal(); render(); showToast("Checklist salvo.");
+      });
+    }
+
+    function machineAction(action) {
+      const asset = byId(state.assets, selectedMachineId);
+      closeMachineMenu();
+      if (!asset) return;
+      if (action === "newOrder") return openOrderModal(asset.id);
+      if (action === "checklists") return openChecklistModal(asset.id);
+      if (action === "history") return openModal("Lista de OS", renderOrderList(asset.id), true);
+      if (action === "openOrders") return openModal("OS's Abertas", renderOrderList(asset.id, "Aberta"));
+      if (action === "pending") return openModal("Pendências Abertas", `<div class="empty">${asset.criticality === "Alta" ? "Existe uma pendência sugerida para análise de causa raiz." : "Nenhuma pendência aberta."}</div>`);
+      if (action === "compiled") return openModal("Compilado de Checklist", renderCompiled(asset), true);
+      if (action === "specialist") return openModal("Especialista GestMan365", `<div class="side-box"><strong>${asset.code} - ${asset.name}</strong><span>Analise histórico de OS, criticidade, checklists pendentes e padrão de repetição das falhas.</span><span>Recomendação: criar checklist preventivo e monitorar MTTR semanal.</span></div>`);
+    }
+
+    function renderOrderList(assetId, status = "") {
+      const rows = state.orders.filter(order => order.assetId === assetId && (!status || order.status === status));
+      return `
+        <div class="form">
+          <label>Entre as datas <input class="field" value="16/03/2026"></label>
+          <label>Até <input class="field" value="15/06/2026"></label>
+          <label>Tipo de Serviço <select class="field"><option>[Todos]</option></select></label>
+          <label>Status <select class="field"><option>${status || "[Todos]"}</option></select></label>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>OS</th><th>Máquina</th><th>Tipo</th><th>Status</th><th>MTTR</th></tr></thead><tbody>
+          ${rows.map(order => `<tr><td>${order.number}</td><td>${machineName(order.assetId)}</td><td>${order.type}</td><td>${tag(order.status)}</td><td>${order.mttr}h</td></tr>`).join("") || `<tr><td colspan="5" class="empty">Nenhum registro encontrado</td></tr>`}
+        </tbody></table></div>
+      `;
+    }
+
+    function renderCompiled(asset) {
+      return `
+        <div style="background:#fff;color:#111;border-radius:6px;padding:18px;min-height:430px">
+          <div style="display:flex;align-items:center;gap:20px;border-bottom:2px solid #4055ff;padding-bottom:8px">
+            <div style="background:#ff4b68;color:#fff;padding:12px 18px">GestMan365</div>
+            <h2 style="color:#4055b9;margin:0">Compilado de Checklist</h2>
+          </div>
+          <p><strong>Região:</strong> UNIDADE 01 - FÁBRICA &nbsp; <strong>Local:</strong> ${locationName(asset.locationId)} &nbsp; <strong>Equipamento:</strong> ${asset.name} - ${asset.code}</p>
+          <div style="border:1px solid #999;border-radius:5px;padding:4px;margin:22px 0 4px">Não existem checklists preenchidos no período selecionado</div>
+          <div style="border:1px solid #999;border-radius:5px;height:100px;padding:6px">Observações gerais</div>
+          <div style="text-align:center;margin-top:120px"><button>Limpar Assinatura</button><div style="width:220px;border-top:1px solid #111;margin:12px auto 6px"></div><small>Técnico Responsável</small></div>
+        </div>
+      `;
+    }
+
+    function editAsset(id) {
+      const item = byId(state.assets, id); if (!item) return;
+      setView("assets");
+      $("assetId").value = item.id; $("assetCode").value = item.code; $("assetName").value = item.name; $("assetLocation").value = item.locationId || ""; $("assetTag").value = item.tagId || ""; $("assetSubtag").value = item.subtagId || ""; $("assetCriticality").value = item.criticality; $("assetStatus").value = item.status; $("assetBrand").value = item.brand || ""; $("assetModel").value = item.model || ""; $("assetIcon").value = item.icon || "ME"; $("assetX").value = item.x; $("assetY").value = item.y; $("assetDescription").value = item.description || "";
+      $("assetFormTitle").textContent = "Editar máquina";
+    }
+
+    function deleteAsset(id) {
+      if (!confirm("Excluir esta máquina e seus vínculos?")) return;
+      state.assets = state.assets.filter(item => item.id !== id);
+      state.orders = state.orders.filter(item => item.assetId !== id);
+      state.checklists = state.checklists.filter(item => item.assetId !== id);
+      saveState(); render(); showToast("Máquina excluída.");
+    }
+
+    function editLocation(id) {
+      const item = byId(state.locations, id); if (!item) return;
+      setView("locations");
+      $("locationId").value = item.id; $("locationName").value = item.name; $("locationType").value = item.type; $("locationColor").value = item.color; $("locationX").value = item.x; $("locationY").value = item.y; $("locationW").value = item.w; $("locationH").value = item.h;
+      $("locationFormTitle").textContent = "Editar local";
+    }
+
+    function deleteLocation(id) {
+      if (!confirm("Excluir este local? As máquinas ficarão sem local.")) return;
+      state.locations = state.locations.filter(item => item.id !== id);
+      state.assets = state.assets.map(asset => asset.locationId === id ? { ...asset, locationId: "" } : asset);
+      saveState(); render(); showToast("Local excluído.");
+    }
+
+    function editTag(id) {
+      const item = byId(state.tags, id); if (!item) return;
+      setView("tags");
+      $("tagId").value = item.id; $("tagCode").value = item.code; $("tagName").value = item.name; $("tagDescription").value = item.description || "";
+    }
+
+    function deleteTag(id) {
+      if (!confirm("Excluir esta tag e subtags vinculadas?")) return;
+      state.tags = state.tags.filter(item => item.id !== id);
+      state.subtags = state.subtags.filter(item => item.parentId !== id);
+      state.assets = state.assets.map(asset => asset.tagId === id ? { ...asset, tagId: "", subtagId: "" } : asset);
+      saveState(); render(); showToast("Tag excluída.");
+    }
+
+    function editSubtag(id) {
+      const item = byId(state.subtags, id); if (!item) return;
+      setView("tags");
+      $("subtagId").value = item.id; $("subtagParent").value = item.parentId; $("subtagCode").value = item.code; $("subtagName").value = item.name;
+    }
+
+    function deleteSubtag(id) {
+      if (!confirm("Excluir esta subtag?")) return;
+      state.subtags = state.subtags.filter(item => item.id !== id);
+      state.assets = state.assets.map(asset => asset.subtagId === id ? { ...asset, subtagId: "" } : asset);
+      saveState(); render(); showToast("Subtag excluída.");
+    }
+
+    function editOrder(id) {
+      const item = byId(state.orders, id); if (!item) return;
+      openOrderModal(item.assetId);
+      setTimeout(() => { $("orderType").value = item.type; $("orderPriority").value = item.priority; $("orderStatus").value = item.status; $("orderMttr").value = item.mttr; $("orderDescription").value = item.description || ""; deleteOrder(id, false); }, 0);
+    }
+
+    function deleteOrder(id, ask = true) {
+      if (ask && !confirm("Excluir esta OS?")) return;
+      state.orders = state.orders.filter(item => item.id !== id);
+      saveState(); render();
+      if (ask) showToast("OS excluída.");
+    }
+
+    function editChecklist(id) {
+      const item = byId(state.checklists, id); if (!item) return;
+      openChecklistModal(item.assetId);
+      setTimeout(() => { $("checkCode").value = item.code; $("checkName").value = item.name; $("checkLast").value = item.lastFill || ""; deleteChecklist(id, false); }, 0);
+    }
+
+    function deleteChecklist(id, ask = true) {
+      if (ask && !confirm("Excluir este checklist?")) return;
+      state.checklists = state.checklists.filter(item => item.id !== id);
+      saveState(); render();
+      if (ask) showToast("Checklist excluído.");
+    }
+
+    window.editAsset = editAsset; window.deleteAsset = deleteAsset; window.editLocation = editLocation; window.deleteLocation = deleteLocation; window.editTag = editTag; window.deleteTag = deleteTag; window.editSubtag = editSubtag; window.deleteSubtag = deleteSubtag; window.editOrder = editOrder; window.deleteOrder = deleteOrder; window.editChecklist = editChecklist; window.deleteChecklist = deleteChecklist;
+
+    document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
+    document.querySelectorAll("[data-view-button]").forEach(button => button.addEventListener("click", () => setView(button.dataset.viewButton)));
+    $("globalSearch").addEventListener("input", render);
+    document.addEventListener("click", event => { if (!event.target.closest("#machineMenu") && !event.target.closest("[data-machine]")) closeMachineMenu(); });
+    $("machineMenu").addEventListener("click", event => { const action = event.target.closest("[data-machine-action]"); if (action) machineAction(action.dataset.machineAction); });
+    document.querySelectorAll("[data-close-modal]").forEach(button => button.addEventListener("click", closeModal));
+    $("genericModal").addEventListener("click", event => { if (event.target.id === "genericModal") closeModal(); });
+    $("createOrderBtn").addEventListener("click", () => openOrderModal());
+    $("createChecklistBtn").addEventListener("click", () => openChecklistModal());
+
+    $("assetForm").addEventListener("submit", event => {
       event.preventDefault();
-      const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-      await insertOrMemory("locais", payload, state.locations, "loc");
-      event.currentTarget.reset();
+      const id = $("assetId").value || uid("asset");
+      const payload = { id, code: value("assetCode"), name: value("assetName"), locationId: $("assetLocation").value, tagId: $("assetTag").value, subtagId: $("assetSubtag").value, criticality: $("assetCriticality").value, status: $("assetStatus").value, brand: value("assetBrand"), model: value("assetModel"), icon: $("assetIcon").value, x: numberValue("assetX", 50), y: numberValue("assetY", 50), description: value("assetDescription") };
+      state.assets = state.assets.filter(item => item.id !== id).concat(payload);
+      saveState(); resetAssetForm(); render(); showToast("Máquina salva.");
     });
 
-    document.getElementById("assetForm").addEventListener("submit", async event => {
+    $("locationForm").addEventListener("submit", event => {
       event.preventDefault();
-      const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-      await insertOrMemory("ativos", { ...payload, alertas: payload.criticidade === "Alta" ? 1 : 0 }, state.assets, "asset");
-      event.currentTarget.reset();
+      const id = $("locationId").value || uid("loc");
+      const payload = { id, name: value("locationName"), type: $("locationType").value, color: value("locationColor") || "#123f8d", x: numberValue("locationX", 5), y: numberValue("locationY", 8), w: numberValue("locationW", 38), h: numberValue("locationH", 28) };
+      state.locations = state.locations.filter(item => item.id !== id).concat(payload);
+      saveState(); resetLocationForm(); render(); showToast("Local salvo.");
     });
 
-    document.getElementById("tagForm").addEventListener("submit", async event => {
+    $("tagForm").addEventListener("submit", event => {
       event.preventDefault();
-      const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-      await insertOrMemory("tags", payload, state.tags, "tag");
-      event.currentTarget.reset();
+      const id = $("tagId").value || uid("tag");
+      const payload = { id, code: value("tagCode"), name: value("tagName"), description: value("tagDescription") };
+      state.tags = state.tags.filter(item => item.id !== id).concat(payload);
+      saveState(); resetTagForm(); render(); showToast("Tag salva.");
     });
 
-    document.getElementById("subTagForm").addEventListener("submit", async event => {
+    $("subtagForm").addEventListener("submit", event => {
       event.preventDefault();
-      const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
-      await insertOrMemory("sub_tags", payload, state.subTags, "sub");
-      event.currentTarget.reset();
+      const id = $("subtagId").value || uid("subtag");
+      const payload = { id, parentId: $("subtagParent").value, code: value("subtagCode"), name: value("subtagName") };
+      state.subtags = state.subtags.filter(item => item.id !== id).concat(payload);
+      saveState(); resetSubtagForm(); render(); showToast("Subtag salva.");
     });
 
-    switchView("overview");
-    refresh();
+    $("resetAssetForm").addEventListener("click", resetAssetForm);
+    $("resetLocationForm").addEventListener("click", resetLocationForm);
+    $("resetTagForm").addEventListener("click", resetTagForm);
+    $("resetSubtagForm").addEventListener("click", resetSubtagForm);
+    $("wipeBtn").addEventListener("click", () => {
+      if (!confirm("Apagar todos os dados criados e começar do zero?")) return;
+      state = emptyState();
+      saveState();
+      resetAssetForm(); resetLocationForm(); resetTagForm(); resetSubtagForm();
+      render();
+      showToast("Todos os dados foram apagados.");
+    });
+    $("exportBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "gestman365-dados.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    render();
   </script>
 </body>
 </html>

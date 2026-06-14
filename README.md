@@ -1,63 +1,47 @@
 # GestMan365
 
-Sistema web inicial para gestao de manutencao, ativos, chamados, mapa industrial e indicadores de confiabilidade, conectado ao Supabase.
+Sistema web para gestao de manutencao, maquinas, mapa industrial, MTTR, MTBF, ordens de servico e checklists.
+
+## Versao atual
+
+Esta versao inicia sem dados cadastrados. A conta visual do sistema e de Administrador, com permissoes para:
+
+- Criar, editar e excluir maquinas.
+- Criar, editar e excluir locais.
+- Criar, editar e excluir tags e subtags.
+- Criar, editar e excluir OS.
+- Criar, editar e excluir checklists.
+- Apagar todos os dados e recomecar.
+- Exportar os dados em JSON.
 
 ## Arquivos
 
-- `index.html`: sistema GestMan365 conectado ao Supabase.
-- `supabase-setup.sql`: cria e atualiza as tabelas iniciais no Supabase.
-- `ESCOPO.md`: escopo inicial do sistema.
+- `index.html`: sistema principal.
+- `supabase-setup.sql`: base inicial para evolucao com Supabase.
+- `ESCOPO.md`: escopo do produto.
 
-## Recursos desta versao
+## Como usar
 
-- Tela inicial em estilo operacional escuro, inspirada em paineis de chao de fabrica.
-- Visao por linhas de producao, com maquinas em blocos pequenos.
-- Alertas por linha e por equipamento.
-- Detalhe rapido ao clicar na maquina, com MTTR e MTBF estimados.
-- Cadastro de locais da planta.
-- Cadastro de tags e subtags.
-- Cadastro de maquinas com local, tag, subtag e posicao no mapa.
-- Chamados operacionais.
+Abra `index.html` no navegador.
 
-## Como configurar o Supabase
+Os dados sao salvos no navegador usando `localStorage`. Para recomecar do zero, clique em `Apagar tudo`.
 
-1. Abra seu projeto no Supabase.
-2. Va em `SQL Editor`.
-3. Clique em `New query`.
-4. Cole o conteudo do arquivo `supabase-setup.sql`.
-5. Clique em `Run`.
+## Fluxo recomendado
 
-## Como abrir o sistema
+1. Crie os locais do parque industrial.
+2. Crie tags e subtags.
+3. Cadastre as maquinas e posicione cada uma no mapa.
+4. Crie OS e checklists para alimentar os indicadores.
+5. Acompanhe MTTR, MTBF, disponibilidade e backlog no dashboard.
 
-Depois de rodar o SQL, abra o arquivo `index.html` no navegador.
+## GitHub
 
-Se voce ainda nao rodou o SQL atualizado, a tela abre em modo demonstracao. Depois de rodar o SQL, clique em `Atualizar`.
+Para publicar:
 
-O arquivo ja esta configurado com:
+1. Crie um repositorio chamado `gestman365`.
+2. Envie os arquivos desta pasta pelo GitHub.
+3. Ative GitHub Pages apontando para `index.html`.
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://zkkyiqtzmimcoderjrrm.supabase.co
-```
+## Seguranca
 
-## Como subir no GitHub pelo site
-
-1. Crie um repositorio no GitHub chamado `gestman365`.
-2. Clique em `Add file`.
-3. Clique em `Upload files`.
-4. Envie estes arquivos:
-   - `index.html`
-   - `supabase-setup.sql`
-   - `ESCOPO.md`
-   - `README.md`
-5. Clique em `Commit changes`.
-
-## Observacao de seguranca
-
-Este projeto usa a chave publica do Supabase no navegador. Isso e normal para prototipos e apps com Row Level Security.
-
-Nao coloque no GitHub:
-
-- Senha do banco.
-- Secret key.
-- Service role key.
-- Tokens pessoais.
+Nao publique senhas, chaves secretas ou service role keys no repositorio.
