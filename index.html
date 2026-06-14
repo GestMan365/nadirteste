@@ -728,6 +728,25 @@
       padding: 14px;
     }
 
+    .active-os-list .table-wrap {
+      padding: 0;
+    }
+
+    .active-os-list table {
+      min-width: 980px;
+    }
+
+    .os-panel-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      min-width: 132px;
+    }
+
+    .os-panel-actions .btn {
+      width: 100%;
+    }
+
     .active-os-item {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -750,6 +769,56 @@
       margin-top: 4px;
     }
 
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .report-card {
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      background: rgba(255,255,255,.06);
+      padding: 12px;
+      min-height: 86px;
+    }
+
+    .report-card span {
+      color: var(--muted);
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .report-card strong {
+      display: block;
+      font-size: 24px;
+    }
+
+    .ai-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .ai-answer {
+      min-height: 220px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      background: rgba(0,0,0,.18);
+      padding: 14px;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
+    .ai-form {
+      display: grid;
+      gap: 10px;
+    }
+
     @media (max-width: 760px) {
       .order-detail {
         grid-template-columns: 1fr;
@@ -768,6 +837,11 @@
 
       .detail-span {
         grid-column: auto;
+      }
+
+      .report-grid,
+      .ai-layout {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -1194,7 +1268,10 @@
       <button class="tab" data-view="locations">Locais</button>
       <button class="tab" data-view="tags">Tags</button>
       <button class="tab" data-view="orders">Ordens</button>
+      <button class="tab" data-view="calendar">Calendario</button>
       <button class="tab" data-view="activeOrders">Painel OS</button>
+      <button class="tab" data-view="reports">Relatorios</button>
+      <button class="tab" data-view="assistant">IA GestMan365</button>
       <button class="tab" data-view="checklists">Checklists</button>
     </div>
     <input class="searchbar" id="globalSearch" placeholder="Pesquisar máquina, local, tag ou OS">
@@ -1211,7 +1288,7 @@
 
       <div class="grid two-col" style="margin-top:14px">
         <div class="panel">
-          <div class="panel-head"><div class="panel-title">Tendência MTTR x MTBF</div><button class="btn primary" data-view-button="assets">Criar máquina</button></div>
+          <div class="panel-head"><div class="panel-title">Tendência MTTR x MTBF</div></div>
           <div class="line-chart" id="trendChart"></div>
         </div>
         <div class="panel">
@@ -1228,6 +1305,16 @@
         <div class="panel">
           <div class="panel-head"><div class="panel-title">OS abertas e em execução</div><button class="btn" data-view-button="activeOrders">Abrir painel</button></div>
           <div id="dashboardActiveOrders" class="active-os-list"></div>
+        </div>
+      </div>
+      <div class="grid two-col" style="margin-top:14px">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">TOP 10 PARADAS DE MAQUINA</div></div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>MAQUINA</th><th>PARADAS</th><th>TEMPO TOTAL</th></tr></thead><tbody id="dashboardStopsRows"></tbody></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">EXECUTANTES POR ORDENS ATENDIDAS</div></div>
+          <div class="table-wrap"><table><thead><tr><th>EXECUTANTE</th><th>ORDENS</th><th>EM EXECUCAO</th><th>CONCLUIDAS</th></tr></thead><tbody id="dashboardExecutorRows"></tbody></table></div>
         </div>
       </div>
     </section>
@@ -1346,9 +1433,25 @@
       <div class="panel">
         <div class="panel-head">
           <div class="panel-title">Ordens de Serviço</div>
-          <button class="btn primary" id="createOrderBtn">Nova OS</button>
+          <div class="toolbar">
+            <button class="btn" type="button" data-view-button="calendar">Calendario</button>
+            <button class="btn primary" id="createOrderBtn">Nova OS</button>
+          </div>
         </div>
-        <div class="table-wrap"><table><thead><tr><th>OS</th><th>Máquina</th><th>Tipo</th><th>Prioridade</th><th>Status</th><th>MTTR</th><th>Ações</th></tr></thead><tbody id="orderRows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>OS</th><th>MAQUINA</th><th>TIPO</th><th>PRIORIDADE</th><th>STATUS</th><th>EXECUTANTE</th><th>ACOES</th></tr></thead><tbody id="orderRows"></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="view" id="calendar">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Calendario de OS</div>
+          <div class="toolbar">
+            <input class="field" id="calendarDate" type="date">
+            <button class="btn" id="calendarTodayBtn" type="button">Hoje</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>OS</th><th>Maquina</th><th>Tipo</th><th>Prioridade</th><th>Status</th><th>Executante</th><th>Abertura</th><th>Inicio</th><th>Fim</th></tr></thead><tbody id="calendarRows"></tbody></table></div>
       </div>
     </section>
 
@@ -1356,9 +1459,51 @@
       <div class="panel">
         <div class="panel-head">
           <div class="panel-title">Painel de OS abertas e em execução</div>
-          <button class="btn primary" id="activePanelNewOrder" data-view-button="orders">Nova OS</button>
         </div>
         <div id="activeOrdersPanel" class="active-os-list"></div>
+      </div>
+    </section>
+
+    <section class="view" id="reports">
+      <div class="grid two-col">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Relatorio automatico do sistema</div></div>
+          <div id="reportSummary" class="report-grid"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Ordens por status</div></div>
+          <div class="chart" id="reportStatusBars"></div>
+        </div>
+      </div>
+      <div class="grid two-col" style="margin-top:14px">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Maquinas por local</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Local</th><th>Maquinas</th><th>OS ativas</th><th>Criticas</th></tr></thead><tbody id="reportLocationRows"></tbody></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Executantes</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Executante</th><th>OS atendidas</th><th>Em execucao</th><th>Concluidas</th></tr></thead><tbody id="reportExecutorRows"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="assistant">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">IA GestMan365</div>
+          <button class="btn" id="aiRefreshBtn" type="button">Atualizar dados</button>
+        </div>
+        <div class="ai-layout">
+          <div>
+            <div id="aiSystemSummary" class="report-grid"></div>
+            <div class="ai-answer" id="aiAnswer">PERGUNTE SOBRE OS DADOS CADASTRADOS NO GESTMAN365.</div>
+          </div>
+          <form class="ai-form" id="aiForm">
+            <label>Pergunta <textarea class="field" id="aiQuestion" placeholder="Ex: QUAIS OS ESTAO EM EXECUCAO?"></textarea></label>
+            <button class="btn primary" type="submit">Perguntar IA</button>
+            <div class="side-box"><strong>Base da IA</strong><span id="aiScopeText">Somente dados registrados no sistema.</span></div>
+          </form>
+        </div>
       </div>
     </section>
 
@@ -1432,6 +1577,9 @@
     function byId(list, id) { return list.find(item => item.id === id); }
     function value(id) { return $(id).value.trim(); }
     function numberValue(id, fallback = 0) { return Number($(id).value || fallback); }
+    function escapeHtml(text) {
+      return String(text ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
 
     function showToast(message) {
       $("toast").textContent = message;
@@ -1505,6 +1653,8 @@
       renderStatusBars();
       renderCriticalityBars();
       renderActiveOrdersPanel("dashboardActiveOrders", 4);
+      renderDashboardStops();
+      renderDashboardExecutors();
     }
 
     function renderTrendChart() {
@@ -1557,6 +1707,152 @@
         const count = state.assets.filter(asset => asset.criticality === item).length;
         return `<div class="bar-row"><strong>${item}</strong><div class="bar-track"><div class="bar" style="width:${(count / max) * 100}%"></div></div><span>${count}</span></div>`;
       }).join("");
+    }
+
+    function orderStatusCounts() {
+      return {
+        abertas: state.orders.filter(order => statusKey(order.status).startsWith("aberta")).length,
+        execucao: state.orders.filter(order => isRunningOrder(order.status)).length,
+        concluidas: state.orders.filter(order => isClosedOrder(order.status)).length,
+        total: state.orders.length
+      };
+    }
+
+    function renderReportCards(targetId) {
+      const target = $(targetId);
+      if (!target) return;
+      const metrics = calcMetrics();
+      const counts = orderStatusCounts();
+      target.innerHTML = [
+        ["OS ABERTAS", counts.abertas],
+        ["OS EM EXECUCAO", counts.execucao],
+        ["OS CONCLUIDAS", counts.concluidas],
+        ["MAQUINAS", state.assets.length],
+        ["MTTR MEDIO", `${metrics.mttr.toFixed(1)}H`],
+        ["MTBF MEDIO", `${metrics.mtbf.toFixed(0)}H`],
+        ["DISPONIBILIDADE", `${metrics.availability.toFixed(1)}%`],
+        ["LOCAIS", state.locations.length]
+      ].map(item => `<div class="report-card"><span>${item[0]}</span><strong>${item[1]}</strong></div>`).join("");
+    }
+
+    function renderReports() {
+      if (!$("reportSummary")) return;
+      renderReportCards("reportSummary");
+      const counts = orderStatusCounts();
+      const statuses = [
+        { label: "ABERTAS", count: counts.abertas },
+        { label: "EM EXECUCAO", count: counts.execucao },
+        { label: "CONCLUIDAS", count: counts.concluidas }
+      ];
+      const maxStatus = Math.max(1, ...statuses.map(item => item.count));
+      $("reportStatusBars").innerHTML = statuses.map(item => `<div class="bar-row"><strong>${item.label}</strong><div class="bar-track"><div class="bar" style="width:${(item.count / maxStatus) * 100}%"></div></div><span>${item.count}</span></div>`).join("");
+      const locationRows = state.locations.map(location => {
+        const machines = state.assets.filter(asset => asset.locationId === location.id);
+        const machineIds = new Set(machines.map(asset => asset.id));
+        const active = state.orders.filter(order => machineIds.has(order.assetId) && !isClosedOrder(order.status)).length;
+        const critical = machines.filter(asset => asset.criticality === "Alta").length;
+        return `<tr><td>${location.name}</td><td>${machines.length}</td><td>${active}</td><td>${critical}</td></tr>`;
+      }).join("");
+      $("reportLocationRows").innerHTML = locationRows || `<tr><td colspan="4" class="empty">Nenhum local cadastrado.</td></tr>`;
+      const executors = {};
+      state.orders.forEach(order => {
+        const name = (order.executor || "SEM EXECUTANTE").trim() || "SEM EXECUTANTE";
+        executors[name] ||= { total: 0, running: 0, closed: 0 };
+        executors[name].total += 1;
+        if (isRunningOrder(order.status)) executors[name].running += 1;
+        if (isClosedOrder(order.status)) executors[name].closed += 1;
+      });
+      $("reportExecutorRows").innerHTML = Object.entries(executors).map(([name, data]) => `<tr><td>${escapeHtml(name)}</td><td>${data.total}</td><td>${data.running}</td><td>${data.closed}</td></tr>`).join("") || `<tr><td colspan="4" class="empty">Nenhum executante registrado.</td></tr>`;
+    }
+
+    function orderMatchesDate(order, dateText) {
+      if (!dateText) return true;
+      const matches = value => value && new Date(Number(value)).toISOString().slice(0, 10) === dateText;
+      return matches(order.createdAt) || matches(order.startedAt) || matches(order.finishedAt);
+    }
+
+    function renderCalendar() {
+      const target = $("calendarRows");
+      if (!target) return;
+      const selected = $("calendarDate").value;
+      const rows = state.orders
+        .filter(order => orderMatchesDate(order, selected))
+        .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+      target.innerHTML = rows.map(order => `
+        <tr>
+          <td>${order.number}</td>
+          <td>${machineName(order.assetId)}</td>
+          <td>${order.type || "-"}</td>
+          <td>${tag(order.priority)}</td>
+          <td>${tag(order.status)}</td>
+          <td>${order.executor || "Sem executante"}</td>
+          <td>${formatDateTime(order.createdAt)}</td>
+          <td>${formatDateTime(order.startedAt)}</td>
+          <td>${formatDateTime(order.finishedAt)}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="9" class="empty">Nenhuma OS encontrada para este dia.</td></tr>`;
+    }
+
+    function executorStatsRows() {
+      const executors = {};
+      state.orders.forEach(order => {
+        const name = (order.executor || "SEM EXECUTANTE").trim() || "SEM EXECUTANTE";
+        executors[name] ||= { total: 0, running: 0, closed: 0 };
+        executors[name].total += 1;
+        if (isRunningOrder(order.status)) executors[name].running += 1;
+        if (isClosedOrder(order.status)) executors[name].closed += 1;
+      });
+      return Object.entries(executors)
+        .sort((a, b) => b[1].total - a[1].total)
+        .map(([name, data]) => ({ name, ...data }));
+    }
+
+    function renderDashboardStops() {
+      const target = $("dashboardStopsRows");
+      if (!target) return;
+      const stops = {};
+      state.orders.filter(order => order.machineStopped).forEach(order => {
+        const key = order.assetId || "sem-maquina";
+        stops[key] ||= { machine: machineName(order.assetId), count: 0, hours: 0 };
+        stops[key].count += 1;
+        stops[key].hours += Number(order.mttr || 0);
+      });
+      const rows = Object.values(stops).sort((a, b) => b.count - a.count || b.hours - a.hours).slice(0, 10);
+      target.innerHTML = rows.map((item, index) => `<tr><td>${index + 1}</td><td>${item.machine}</td><td>${item.count}</td><td>${item.hours.toFixed(1)}H</td></tr>`).join("") || `<tr><td colspan="4" class="empty">Nenhuma parada registrada.</td></tr>`;
+    }
+
+    function renderDashboardExecutors() {
+      const target = $("dashboardExecutorRows");
+      if (!target) return;
+      const rows = executorStatsRows().slice(0, 10);
+      target.innerHTML = rows.map(item => `<tr><td>${escapeHtml(item.name)}</td><td>${item.total}</td><td>${item.running}</td><td>${item.closed}</td></tr>`).join("") || `<tr><td colspan="4" class="empty">Nenhum executante registrado.</td></tr>`;
+    }
+
+    function renderAssistantSummary() {
+      renderReportCards("aiSystemSummary");
+    }
+
+    function answerSystemAi(question) {
+      const q = statusKey(question);
+      const metrics = calcMetrics();
+      const counts = orderStatusCounts();
+      const running = state.orders.filter(order => isRunningOrder(order.status));
+      const open = state.orders.filter(order => statusKey(order.status).startsWith("aberta"));
+      const critical = state.assets.filter(asset => asset.criticality === "Alta");
+      if (!question.trim()) return "DIGITE UMA PERGUNTA SOBRE OS DADOS DO SISTEMA.";
+      if (q.includes("internet") || q.includes("fora")) return "ESTA IA ESTA RESTRITA AOS DADOS CADASTRADOS NO GESTMAN365. NAO CONSULTO INTERNET NEM FONTES EXTERNAS.";
+      if (q.includes("mttr") || q.includes("mtbf") || q.includes("dispon")) return `MTTR MEDIO: ${metrics.mttr.toFixed(1)}H.\nMTBF MEDIO: ${metrics.mtbf.toFixed(0)}H.\nDISPONIBILIDADE: ${metrics.availability.toFixed(1)}%.`;
+      if (q.includes("execu")) return running.length ? running.map(order => `${order.number} | ${machineName(order.assetId)} | EXECUTANTE: ${order.executor || "SEM EXECUTANTE"}`).join("\n") : "NAO HA OS EM EXECUCAO.";
+      if (q.includes("abert")) return open.length ? open.map(order => `${order.number} | ${machineName(order.assetId)} | PRIORIDADE: ${order.priority} | EXECUTANTE: ${order.executor || "SEM EXECUTANTE"}`).join("\n") : "NAO HA OS ABERTA.";
+      if (q.includes("execut")) {
+        const names = [...new Set(state.orders.map(order => order.executor || "SEM EXECUTANTE"))];
+        return names.length ? names.map(name => `${name}: ${state.orders.filter(order => (order.executor || "SEM EXECUTANTE") === name).length} OS`).join("\n") : "NENHUM EXECUTANTE REGISTRADO.";
+      }
+      if (q.includes("critic") || q.includes("alta")) return critical.length ? critical.map(asset => `${asset.code} - ${asset.name} | LOCAL: ${locationName(asset.locationId)}`).join("\n") : "NAO HA MAQUINAS DE ALTA CRITICIDADE CADASTRADAS.";
+      if (q.includes("local") || q.includes("linha") || q.includes("fase")) return state.locations.length ? state.locations.map(location => `${location.name}: ${state.assets.filter(asset => asset.locationId === location.id).length} MAQUINAS`).join("\n") : "NENHUM LOCAL CADASTRADO.";
+      if (q.includes("maquina") || q.includes("equip")) return state.assets.length ? state.assets.map(asset => `${asset.code} - ${asset.name} | ${locationName(asset.locationId)} | ${asset.status}`).join("\n") : "NENHUMA MAQUINA CADASTRADA.";
+      if (q.includes("resumo") || q.includes("geral")) return `RESUMO DO SISTEMA:\nOS TOTAL: ${counts.total}\nABERTAS: ${counts.abertas}\nEM EXECUCAO: ${counts.execucao}\nCONCLUIDAS: ${counts.concluidas}\nMAQUINAS: ${state.assets.length}\nLOCAIS: ${state.locations.length}`;
+      return `TENHO DADOS DO SISTEMA SOBRE ${state.assets.length} MAQUINAS, ${state.locations.length} LOCAIS E ${state.orders.length} ORDENS DE SERVICO. PERGUNTE POR OS ABERTAS, EM EXECUCAO, EXECUTANTE, MTTR, MTBF, DISPONIBILIDADE, LOCAL OU MAQUINA.`;
     }
 
     function statusKey(status = "") {
@@ -1887,7 +2183,7 @@
       $("tagRows").innerHTML = tagRows + subRows || `<tr><td colspan="5" class="empty">Nenhuma tag criada.</td></tr>`;
 
       $("orderRows").innerHTML = state.orders.map(order => `
-        <tr><td>${order.number}</td><td>${machineName(order.assetId)}</td><td>${order.type}</td><td>${tag(order.priority)}</td><td>${tag(order.status)}</td><td>${order.mttr || 0}h</td><td class="actions">${!isRunningOrder(order.status) && !isClosedOrder(order.status) ? `<button class="btn primary" onclick="confirmStartOrder('${order.id}')">Iniciar</button>` : ""}${isRunningOrder(order.status) ? `<button class="btn primary" onclick="finishOrder('${order.id}')">Finalizar</button>` : ""}<button class="btn" onclick="editOrder('${order.id}')">Editar</button><button class="btn danger" onclick="deleteOrder('${order.id}')">Excluir</button></td></tr>
+        <tr><td>${order.number}</td><td>${machineName(order.assetId)}</td><td>${order.type}</td><td>${tag(order.priority)}</td><td>${tag(order.status)}</td><td>${order.executor || "Sem executante"}</td><td><div class="os-panel-actions">${!isRunningOrder(order.status) && !isClosedOrder(order.status) ? `<button class="btn primary" onclick="confirmStartOrder('${order.id}')">Iniciar</button>` : ""}${isRunningOrder(order.status) ? `<button class="btn primary" onclick="finishOrder('${order.id}')">Finalizar</button>` : ""}<button class="btn" onclick="editOrder('${order.id}')">Editar</button><button class="btn danger" onclick="deleteOrder('${order.id}')">Excluir</button></div></td></tr>
       `).join("") || `<tr><td colspan="7" class="empty">Nenhuma OS criada.</td></tr>`;
 
       $("checklistRows").innerHTML = state.checklists.map(item => `
@@ -1902,19 +2198,27 @@
         .filter(order => !isClosedOrder(order.status))
         .sort((a, b) => Number(b.startedAt || b.createdAt || 0) - Number(a.startedAt || a.createdAt || 0));
       const visible = limit ? rows.slice(0, limit) : rows;
-      target.innerHTML = visible.map(order => `
-        <div class="active-os-item">
-          <div>
-            <strong>${order.number} - ${machineName(order.assetId)}</strong>
-            <small>${tag(order.status)} Solicitante: ${order.requester || "-"}</small>
-            <small>Abertura: ${formatDateTime(order.createdAt)} | Inicio: ${formatDateTime(order.startedAt)}</small>
-          </div>
-          <div class="actions">
-            <button class="btn" onclick="showOrderDetails('${order.id}')">Detalhes</button>
-            ${isRunningOrder(order.status) ? `<button class="btn primary" onclick="finishOrder('${order.id}')">Finalizar</button>` : `<button class="btn primary" onclick="confirmStartOrder('${order.id}')">Iniciar</button>`}
-          </div>
-        </div>
-      `).join("") || `<div class="empty">Nao tem ordens em aberto ou em execucao.</div>`;
+      target.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>OS</th><th>Maquina</th><th>Tipo</th><th>Prioridade</th><th>Status</th><th>Executante</th><th>Acoes</th></tr></thead>
+            <tbody>
+              ${visible.map(order => `
+                <tr>
+                  <td>${order.number}</td>
+                  <td>${machineName(order.assetId)}</td>
+                  <td>${order.type || "-"}</td>
+                  <td>${tag(order.priority)}</td>
+                  <td>${tag(order.status)}</td>
+                  <td>${order.executor || "Sem executante"}</td>
+                  <td><div class="os-panel-actions">
+                    <button class="btn" onclick="showOrderDetails('${order.id}')">Detalhes</button>
+                  </div></td>
+                </tr>
+              `).join("") || `<tr><td colspan="7" class="empty">Nao tem ordens em aberto ou em execucao.</td></tr>`}
+            </tbody>
+          </table>
+        </div>`;
     }
 
     function render() {
@@ -1923,6 +2227,9 @@
       renderMap();
       renderTables();
       renderActiveOrdersPanel("activeOrdersPanel");
+      renderCalendar();
+      renderReports();
+      renderAssistantSummary();
       renderProfile();
     }
 
@@ -2017,11 +2324,12 @@
     function confirmStartOrder(id) {
       const order = byId(state.orders, id);
       if (!order) return;
-      openModal("Confirmar início", `
+      openModal("Confirmar inicio", `
         <div class="side-box">
-          <strong>Confirma o início da ${order.number}?</strong>
-          <span>Máquina: ${machineName(order.assetId)}</span>
-          <span>A data e hora de início serão registradas automaticamente.</span>
+          <strong>Confirma o inicio da ${order.number}?</strong>
+          <span>Maquina: ${machineName(order.assetId)}</span>
+          <span>A data e hora de inicio serao registradas automaticamente.</span>
+          <label>Executante <input class="field" id="startExecutor" value="${order.executor || ""}" placeholder="Nome de quem esta atendendo"></label>
         </div>
         <div class="toolbar">
           <button class="btn danger" id="cancelStartOrder">Cancelar</button>
@@ -2030,8 +2338,13 @@
       `);
       $("cancelStartOrder").addEventListener("click", closeModal);
       $("confirmStartOrderBtn").addEventListener("click", () => {
+        const executor = $("startExecutor").value.trim();
+        if (!executor) {
+          showToast("Informe o executante para iniciar a OS.");
+          return;
+        }
         closeModal();
-        startOrder(id);
+        startOrder(id, executor);
       });
     }
 
@@ -2252,6 +2565,7 @@
         <form class="form" id="orderForm">
           <label>Maquina <select class="field" id="orderAsset">${machines || `<option value="">Cadastre uma maquina</option>`}</select></label>
           <label>Solicitante <input class="field" id="orderRequester" placeholder="Quem abriu a ordem"></label>
+          <label>Executante <input class="field" id="orderExecutor" placeholder="Quem vai atender a ordem"></label>
           <label>Tipo <select class="field" id="orderType"><option>Corretiva</option><option>Preventiva</option><option>Inspecao</option></select></label>
           <label>Prioridade <select class="field" id="orderPriority"><option>Baixa</option><option>Media</option><option>Alta</option></select></label>
           <label class="full">Descricao <textarea class="field" id="orderDescription"></textarea></label>
@@ -2263,6 +2577,7 @@
       $("genericModalBox").style.width = "760px";
       if (editing) {
         $("orderRequester").value = editing.requester || "";
+        $("orderExecutor").value = editing.executor || "";
         $("orderType").value = editing.type || "Corretiva";
         $("orderPriority").value = editing.priority || "Baixa";
         $("orderDescription").value = editing.description || "";
@@ -2275,6 +2590,7 @@
           ...base,
           assetId: $("orderAsset").value,
           requester: $("orderRequester").value,
+          executor: $("orderExecutor").value,
           type: $("orderType").value,
           maintenance: base.maintenance || "",
           priority: $("orderPriority").value,
@@ -2429,7 +2745,7 @@
       if (ask) showToast("OS excluída.");
     }
 
-    function startOrder(id) {
+    function startOrder(id, executorName = "") {
       const now = Date.now();
       const current = byId(state.orders, id);
       if (!current || isClosedOrder(current.status)) {
@@ -2438,6 +2754,7 @@
       }
       state.orders = state.orders.map(order => order.id === id ? {
         ...order,
+        executor: executorName || order.executor || "",
         status: "Em execucao",
         startedAt: order.startedAt || now
       } : order);
@@ -2581,6 +2898,20 @@
     $("profileBtn").addEventListener("click", openProfileModal);
     $("createOrderBtn").addEventListener("click", () => openOrderModal());
     $("createChecklistBtn").addEventListener("click", () => openChecklistModal());
+    $("calendarDate").value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    $("calendarDate").addEventListener("change", renderCalendar);
+    $("calendarTodayBtn").addEventListener("click", () => {
+      $("calendarDate").value = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      renderCalendar();
+    });
+    $("aiForm").addEventListener("submit", event => {
+      event.preventDefault();
+      $("aiAnswer").textContent = answerSystemAi($("aiQuestion").value);
+    });
+    $("aiRefreshBtn").addEventListener("click", () => {
+      renderAssistantSummary();
+      $("aiAnswer").textContent = answerSystemAi("resumo");
+    });
 
     $("assetForm").addEventListener("submit", event => {
       event.preventDefault();
@@ -2646,6 +2977,11 @@
       renderTables();
       renderActiveOrdersPanel("dashboardActiveOrders", 4);
       renderActiveOrdersPanel("activeOrdersPanel");
+      renderCalendar();
+      renderDashboardStops();
+      renderDashboardExecutors();
+      renderReports();
+      renderAssistantSummary();
     }, 30000);
 
     render();
