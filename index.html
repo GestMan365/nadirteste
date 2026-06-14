@@ -535,6 +535,38 @@
       background: rgba(255,138,76,.12);
     }
 
+    .os-action-card {
+      margin-top: 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.18);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .os-action-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      background: rgba(255,138,76,.18);
+      font-weight: 900;
+    }
+
+    .os-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1px;
+      background: rgba(255,255,255,.12);
+    }
+
+    .os-actions button {
+      justify-content: flex-start;
+      border-radius: 0;
+      border: 0;
+      background: #121f3a;
+    }
+
     .actions {
       display: flex;
       gap: 6px;
@@ -1275,11 +1307,12 @@
     }
 
     function renderStatusBars() {
-      const statuses = ["Aberta", "Planejada", "Concluída"];
-      const max = Math.max(1, ...statuses.map(status => state.orders.filter(order => order.status === status).length));
+      const statuses = [{ label: "Aberta", match: "aberta" }, { label: "Planejada", match: "planejada" }, { label: "Concluida", match: "conclu" }];
+      const countFor = status => state.orders.filter(order => statusKey(order.status).startsWith(status.match)).length;
+      const max = Math.max(1, ...statuses.map(countFor));
       $("statusBars").innerHTML = statuses.map(status => {
-        const count = state.orders.filter(order => order.status === status).length;
-        return `<div class="bar-row"><strong>${status}</strong><div class="bar-track"><div class="bar" style="width:${(count / max) * 100}%"></div></div><span>${count}</span></div>`;
+        const count = countFor(status);
+        return `<div class="bar-row"><strong>${status.label}</strong><div class="bar-track"><div class="bar" style="width:${(count / max) * 100}%"></div></div><span>${count}</span></div>`;
       }).join("");
     }
 
@@ -1292,25 +1325,38 @@
       }).join("");
     }
 
+    function statusKey(status = "") {
+      return String(status).normalize("NFD").replace(/[\u0300-\u036f?]/g, "").toLowerCase();
+    }
+
+    function isRunningOrder(status = "") {
+      return statusKey(status).startsWith("em exec");
+    }
+
+    function isClosedOrder(status = "") {
+      const key = statusKey(status);
+      return key.startsWith("conclu") || key === "finalizada" || key === "cancelada";
+    }
+
     function activeOrdersForAsset(assetId) {
       return state.orders.filter(order =>
         order.assetId === assetId &&
-        !["Concluída", "Finalizada", "Cancelada"].includes(order.status)
+        !isClosedOrder(order.status)
       );
     }
 
     function orderAlertForAsset(assetId) {
       const active = activeOrdersForAsset(assetId);
       if (!active.length) return null;
-      if (active.some(order => order.status === "Em execução")) {
-        return { className: "running", count: active.length, label: "OS em execução" };
+      if (active.some(order => isRunningOrder(order.status))) {
+        return { className: "running", count: active.length, label: "OS em execucao" };
       }
       const newest = active.reduce((latest, order) => Math.max(latest, Number(order.createdAt || 0)), 0);
       const ageMs = Date.now() - newest;
       if (ageMs <= 5 * 60 * 1000) {
         return { className: "recent", count: active.length, label: "OS aberta recentemente" };
       }
-      return { className: "waiting", count: active.length, label: "OS aberta aguardando início" };
+      return { className: "waiting", count: active.length, label: "OS aberta aguardando inicio" };
     }
 
     function autoResizeLocations() {
@@ -1355,6 +1401,34 @@
       return {
         x: Number(Math.min(Number(location.x) + Number(location.w) - 5, x).toFixed(2)),
         y: Number(Math.min(Number(location.y) + Number(location.h) - 5, y).toFixed(2))
+      };
+    }
+
+    function snapMachineToLocation(locationId, x, y, excludeId = "") {
+      const location = byId(state.locations, locationId);
+      if (!location) return { x: 50, y: 50 };
+      const minX = Number(location.x) + 5;
+      const maxX = Number(location.x) + Number(location.w) - 5;
+      const minY = Number(location.y) + 10;
+      const maxY = Number(location.y) + Number(location.h) - 6;
+      const cols = Math.max(3, Math.floor(Number(location.w || 30) / 10));
+      const rows = Math.max(1, Math.ceil(Number(location.h || 24) / 10));
+      const used = new Set(state.assets
+        .filter(asset => asset.locationId === locationId && asset.id !== excludeId)
+        .map(asset => `${Number(asset.x).toFixed(1)}:${Number(asset.y).toFixed(1)}`));
+      const slots = [];
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const sx = Math.min(maxX, minX + col * 9);
+          const sy = Math.min(maxY, minY + row * 10);
+          const key = `${Number(sx).toFixed(1)}:${Number(sy).toFixed(1)}`;
+          slots.push({ x: sx, y: sy, used: used.has(key), dist: Math.hypot(sx - Number(x), sy - Number(y)) });
+        }
+      }
+      const slot = slots.filter(item => !item.used).sort((a, b) => a.dist - b.dist)[0] || slots.sort((a, b) => a.dist - b.dist)[0];
+      return {
+        x: Number(Math.min(maxX, Math.max(minX, slot?.x || x)).toFixed(2)),
+        y: Number(Math.min(maxY, Math.max(minY, slot?.y || y)).toFixed(2))
       };
     }
 
@@ -1459,10 +1533,11 @@
         return;
       }
       if (fromLocation?.id === toLocation.id) {
+        const snapped = snapMachineToLocation(toLocation.id, finished.newX ?? finished.originalX, finished.newY ?? finished.originalY, finished.id);
         state.assets = state.assets.map(item => item.id === finished.id ? {
           ...item,
-          x: finished.newX ?? finished.originalX,
-          y: finished.newY ?? finished.originalY,
+          x: snapped.x,
+          y: snapped.y,
           locationId: toLocation.id
         } : item);
         dragState = null;
@@ -1471,12 +1546,13 @@
         showToast(`Máquina reposicionada dentro de ${toLocation.name}.`);
         return;
       }
+      const snappedMove = snapMachineToLocation(toLocation.id, finished.newX ?? finished.originalX, finished.newY ?? finished.originalY, finished.id);
       pendingMove = {
         assetId: finished.id,
         oldX: finished.originalX,
         oldY: finished.originalY,
-        newX: finished.newX ?? finished.originalX,
-        newY: finished.newY ?? finished.originalY,
+        newX: snappedMove.x,
+        newY: snappedMove.y,
         fromLocationId: fromLocation?.id || "",
         toLocationId: toLocation.id,
         fromLocationName: fromLocation?.name || locationName(byId(state.assets, finished.id)?.locationId),
@@ -1577,7 +1653,7 @@
       $("tagRows").innerHTML = tagRows + subRows || `<tr><td colspan="5" class="empty">Nenhuma tag criada.</td></tr>`;
 
       $("orderRows").innerHTML = state.orders.map(order => `
-        <tr><td>${order.number}</td><td>${machineName(order.assetId)}</td><td>${order.type}</td><td>${tag(order.priority)}</td><td>${tag(order.status)}</td><td>${order.mttr || 0}h</td><td class="actions">${order.status !== "Em execução" && !["Concluída", "Finalizada", "Cancelada"].includes(order.status) ? `<button class="btn primary" onclick="startOrder('${order.id}')">Iniciar</button>` : ""}${order.status === "Em execução" ? `<button class="btn primary" onclick="finishOrder('${order.id}')">Finalizar</button>` : ""}<button class="btn" onclick="editOrder('${order.id}')">Editar</button><button class="btn danger" onclick="deleteOrder('${order.id}')">Excluir</button></td></tr>
+        <tr><td>${order.number}</td><td>${machineName(order.assetId)}</td><td>${order.type}</td><td>${tag(order.priority)}</td><td>${tag(order.status)}</td><td>${order.mttr || 0}h</td><td class="actions">${!isRunningOrder(order.status) && !isClosedOrder(order.status) ? `<button class="btn primary" onclick="confirmStartOrder('${order.id}')">Iniciar</button>` : ""}${isRunningOrder(order.status) ? `<button class="btn primary" onclick="finishOrder('${order.id}')">Finalizar</button>` : ""}<button class="btn" onclick="editOrder('${order.id}')">Editar</button><button class="btn danger" onclick="deleteOrder('${order.id}')">Excluir</button></td></tr>
       `).join("") || `<tr><td colspan="7" class="empty">Nenhuma OS criada.</td></tr>`;
 
       $("checklistRows").innerHTML = state.checklists.map(item => `
@@ -1629,6 +1705,63 @@
     }
 
     function closeModal() { $("genericModal").classList.remove("open"); }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+      return new Date(Number(value)).toLocaleString("pt-BR");
+    }
+
+    function confirmStartOrder(id) {
+      const order = byId(state.orders, id);
+      if (!order) return;
+      openModal("Confirmar início", `
+        <div class="side-box">
+          <strong>Confirma o início da ${order.number}?</strong>
+          <span>Máquina: ${machineName(order.assetId)}</span>
+          <span>A data e hora de início serão registradas automaticamente.</span>
+        </div>
+        <div class="toolbar">
+          <button class="btn danger" id="cancelStartOrder">Cancelar</button>
+          <button class="btn primary" id="confirmStartOrderBtn">Confirmar</button>
+        </div>
+      `);
+      $("cancelStartOrder").addEventListener("click", closeModal);
+      $("confirmStartOrderBtn").addEventListener("click", () => {
+        closeModal();
+        startOrder(id);
+      });
+    }
+
+    function showOrderDetails(id) {
+      const order = byId(state.orders, id);
+      if (!order) return;
+      openModal("Detalhes da OS", `
+        <div class="side-box">
+          <strong>${order.number}</strong>
+          <span>Máquina: ${machineName(order.assetId)}</span>
+          <span>Tipo: ${order.type}</span>
+          <span>Status: ${order.status}</span>
+          <span>Abertura: ${formatDateTime(order.createdAt)}</span>
+          <span>Início: ${formatDateTime(order.startedAt)}</span>
+          <span>Finalização: ${formatDateTime(order.finishedAt)}</span>
+          <span>Descrição: ${order.description || "-"}</span>
+        </div>
+      `);
+    }
+
+    function simpleOrderAction(id, action) {
+      const order = byId(state.orders, id);
+      if (!order) return;
+      if (action === "copy") {
+        const clone = { ...order, id: uid("os"), number: `OS-${String(state.orders.length + 1).padStart(4, "0")}`, status: "Aberta", createdAt: Date.now(), startedAt: null, finishedAt: null };
+        state.orders.unshift(clone);
+        saveState();
+        render();
+        showToast("OS copiada.");
+        return;
+      }
+      showToast(`${action} registrado para ${order.number}.`);
+    }
 
     function openMoveReasonModal() {
       const asset = byId(state.assets, pendingMove?.assetId);
@@ -1703,39 +1836,50 @@
       showToast("Deslocamento cancelado.");
     }
 
-    function openOrderModal(assetId = "") {
-      const machines = state.assets.map(asset => `<option value="${asset.id}" ${asset.id === assetId ? "selected" : ""}>${asset.code} - ${asset.name}</option>`).join("");
-      openModal("Criar OS", `
+    function openOrderModal(assetId = "", editId = "") {
+      const editing = byId(state.orders, editId);
+      const selectedAssetId = editing?.assetId || assetId;
+      const machines = state.assets.map(asset => `<option value="${asset.id}" ${asset.id === selectedAssetId ? "selected" : ""}>${asset.code} - ${asset.name}</option>`).join("");
+      openModal(editing ? "Preencher OS" : "Criar OS", `
         <form class="form" id="orderForm">
-          <label>Máquina <select class="field" id="orderAsset">${machines || `<option value="">Cadastre uma máquina</option>`}</select></label>
-          <label>Tipo <select class="field" id="orderType"><option>Corretiva</option><option>Preventiva</option><option>Inspeção</option></select></label>
-          <label>Prioridade <select class="field" id="orderPriority"><option>Baixa</option><option>Média</option><option>Alta</option></select></label>
-          <label>Status <select class="field" id="orderStatus"><option>Aberta</option><option>Planejada</option><option>Em execução</option><option>Concluída</option></select></label>
+          <label>Maquina <select class="field" id="orderAsset">${machines || `<option value="">Cadastre uma maquina</option>`}</select></label>
+          <label>Tipo <select class="field" id="orderType"><option>Corretiva</option><option>Preventiva</option><option>Inspecao</option></select></label>
+          <label>Prioridade <select class="field" id="orderPriority"><option>Baixa</option><option>Media</option><option>Alta</option></select></label>
+          <label>Status <select class="field" id="orderStatus"><option>Aberta</option><option>Planejada</option><option>Em execucao</option><option>Concluida</option></select></label>
           <label>MTTR estimado (h) <input class="field" id="orderMttr" type="number" value="4"></label>
-          <label class="full">Descrição <textarea class="field" id="orderDescription"></textarea></label>
+          <label class="full">Descricao <textarea class="field" id="orderDescription"></textarea></label>
+          ${editing ? `<div class="full side-box"><strong>Registro</strong><span>Abertura: ${formatDateTime(editing.createdAt)}</span><span>Inicio: ${formatDateTime(editing.startedAt)}</span><span>Finalizacao: ${formatDateTime(editing.finishedAt)}</span></div>` : ""}
           <div class="full toolbar"><button class="btn primary" type="submit">Salvar OS</button></div>
         </form>
       `);
       $("genericModalBox").classList.remove("large");
       $("genericModalBox").style.width = "760px";
+      if (editing) {
+        $("orderType").value = editing.type || "Corretiva";
+        $("orderPriority").value = editing.priority || "Baixa";
+        $("orderStatus").value = isRunningOrder(editing.status) ? "Em execucao" : isClosedOrder(editing.status) ? "Concluida" : editing.status || "Aberta";
+        $("orderMttr").value = editing.mttr || 4;
+        $("orderDescription").value = editing.description || "";
+      }
       $("orderForm").addEventListener("submit", event => {
         event.preventDefault();
+        const now = Date.now();
         const status = $("orderStatus").value;
-        state.orders.unshift({
-          id: uid("os"),
-          number: `OS-${String(state.orders.length + 1).padStart(4, "0")}`,
+        const base = editing || { id: uid("os"), number: `OS-${String(state.orders.length + 1).padStart(4, "0")}`, createdAt: now };
+        const payload = {
+          ...base,
           assetId: $("orderAsset").value,
           type: $("orderType").value,
-          maintenance: "",
+          maintenance: base.maintenance || "",
           priority: $("orderPriority").value,
           status,
-          createdAt: Date.now(),
-          startedAt: status === "Em execução" ? Date.now() : null,
-          finishedAt: status === "Concluída" ? Date.now() : null,
+          startedAt: status.startsWith("Em exec") ? (base.startedAt || now) : base.startedAt || null,
+          finishedAt: status.startsWith("Conclu") ? (base.finishedAt || now) : base.finishedAt || null,
           mttr: Number($("orderMttr").value || 0),
           description: $("orderDescription").value
-        });
-        saveState(); closeModal(); render(); showToast("OS criada.");
+        };
+        state.orders = state.orders.filter(order => order.id !== payload.id).concat(payload);
+        saveState(); closeModal(); render(); showToast(editing ? "OS atualizada." : "OS criada.");
       });
     }
 
@@ -1775,13 +1919,26 @@
       return `
         <div class="form">
           <label>Entre as datas <input class="field" value="16/03/2026"></label>
-          <label>At? <input class="field" value="15/06/2026"></label>
-          <label>Tipo de Servi?o <select class="field"><option>[Todos]</option></select></label>
+          <label>Ate <input class="field" value="15/06/2026"></label>
+          <label>Tipo de Servico <select class="field"><option>[Todos]</option></select></label>
           <label>Status <select class="field"><option>${status || "[Todos]"}</option></select></label>
         </div>
-        <div class="table-wrap"><table><thead><tr><th>OS</th><th>M?quina</th><th>Tipo</th><th>Status</th><th>MTTR</th><th>A??o</th></tr></thead><tbody>
-          ${rows.map(order => `<tr class="click-row" onclick="editOrder('${order.id}')"><td>${order.number}</td><td>${machineName(order.assetId)}</td><td>${order.type}</td><td>${tag(order.status)}</td><td>${order.mttr}h</td><td><button class="btn primary" type="button" onclick="event.stopPropagation(); editOrder('${order.id}')">Preencher</button></td></tr>`).join("") || `<tr><td colspan="6" class="empty">Nenhum registro encontrado</td></tr>`}
-        </tbody></table></div>
+        ${rows.map(order => `
+          <div class="os-action-card">
+            <div class="os-action-head"><span>${order.number} - ${machineName(order.assetId)}</span><span>${tag(order.status)}</span></div>
+            <div class="side-box" style="margin:10px"><span>Aberta: ${formatDateTime(order.createdAt)}</span><span>Inicio: ${formatDateTime(order.startedAt)}</span><span>Finalizacao: ${formatDateTime(order.finishedAt)}</span></div>
+            <div class="os-actions">
+              <button class="btn" onclick="showOrderDetails('${order.id}')">Detalhes</button>
+              <button class="btn" onclick="editOrder('${order.id}')">Editar / Preencher</button>
+              <button class="btn" onclick="finishOrder('${order.id}')">Encerrar</button>
+              <button class="btn" onclick="simpleOrderAction('${order.id}', 'Impressao')">Imprimir</button>
+              <button class="btn" onclick="simpleOrderAction('${order.id}', 'Compartilhamento')">Compartilhar OS</button>
+              <button class="btn" onclick="simpleOrderAction('${order.id}', 'copy')">Copiar OS</button>
+              <button class="btn primary" onclick="confirmStartOrder('${order.id}')">Iniciar OS</button>
+              <button class="btn danger" onclick="simpleOrderAction('${order.id}', 'PDF')">PDF Gerar PDF</button>
+            </div>
+          </div>
+        `).join("") || `<div class="empty">Nenhum registro encontrado</div>`}
       `;
     }
 
@@ -1858,15 +2015,7 @@
 
     function editOrder(id) {
       const item = byId(state.orders, id); if (!item) return;
-      openOrderModal(item.assetId);
-      setTimeout(() => {
-        $("orderType").value = item.type || "Corretiva";
-        $("orderPriority").value = item.priority || "Baixa";
-        $("orderStatus").value = item.status || "Aberta";
-        $("orderMttr").value = item.mttr || 4;
-        $("orderDescription").value = item.description || "";
-        deleteOrder(id, false);
-      }, 0);
+      openOrderModal(item.assetId, id);
     }
 
     function deleteOrder(id, ask = true) {
@@ -1880,8 +2029,8 @@
       const now = Date.now();
       state.orders = state.orders.map(order => order.id === id ? {
         ...order,
-        status: "Em execução",
-        startedAt: now
+        status: "Em execucao",
+        startedAt: order.startedAt || now
       } : order);
       saveState();
       render();
@@ -1896,12 +2045,13 @@
         const calculatedMttr = Math.max(0.1, (now - startedAt) / 36e5);
         return {
           ...order,
-          status: "Concluída",
+          status: "Concluida",
           finishedAt: now,
           mttr: Number(calculatedMttr.toFixed(1))
         };
       });
       saveState();
+      closeModal();
       render();
       showToast("OS finalizada. Alerta removido do mapa e ordem registrada.");
     }
@@ -1919,7 +2069,7 @@
       if (ask) showToast("Checklist excluído.");
     }
 
-    window.editAsset = editAsset; window.deleteAsset = deleteAsset; window.editLocation = editLocation; window.deleteLocation = deleteLocation; window.editTag = editTag; window.deleteTag = deleteTag; window.editSubtag = editSubtag; window.deleteSubtag = deleteSubtag; window.editOrder = editOrder; window.deleteOrder = deleteOrder; window.startOrder = startOrder; window.finishOrder = finishOrder; window.editChecklist = editChecklist; window.deleteChecklist = deleteChecklist;
+    window.editAsset = editAsset; window.deleteAsset = deleteAsset; window.editLocation = editLocation; window.deleteLocation = deleteLocation; window.editTag = editTag; window.deleteTag = deleteTag; window.editSubtag = editSubtag; window.deleteSubtag = deleteSubtag; window.editOrder = editOrder; window.deleteOrder = deleteOrder; window.startOrder = startOrder; window.confirmStartOrder = confirmStartOrder; window.finishOrder = finishOrder; window.showOrderDetails = showOrderDetails; window.simpleOrderAction = simpleOrderAction; window.editChecklist = editChecklist; window.deleteChecklist = deleteChecklist;
 
     document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
     document.querySelectorAll("[data-view-button]").forEach(button => button.addEventListener("click", () => setView(button.dataset.viewButton)));
