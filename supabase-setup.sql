@@ -24,7 +24,7 @@ create table if not exists public.locais (
   nome text not null unique,
   tipo text not null default 'Area',
   codigo_visual text,
-  cor text not null default '#0f766e',
+  cor text not null default '#123f8d',
   x numeric(5,2) not null default 0,
   y numeric(5,2) not null default 0,
   largura numeric(5,2) not null default 24,
@@ -172,9 +172,9 @@ create policy "prototipo_update_pecas" on public.pecas for update using (true);
 
 insert into public.locais (nome, tipo, cor, x, y, largura, altura)
 values
-  ('Linha 1', 'Linha', '#0f766e', 6, 8, 42, 32),
-  ('Utilidades', 'Area', '#1d4ed8', 54, 8, 36, 32),
-  ('Almoxarifado tecnico', 'Area', '#b45309', 12, 54, 32, 30)
+  ('Linha 01 - Producao', 'Linha', '#123f8d', 6, 8, 42, 32),
+  ('Linha 02 - Producao', 'Linha', '#123f8d', 54, 8, 36, 32),
+  ('Linha 03 - Producao', 'Linha', '#ff8a4c', 12, 54, 32, 30)
 on conflict (nome) do nothing;
 
 insert into public.tags (codigo, nome, descricao)
@@ -224,7 +224,7 @@ values
     'Paula Rocha',
     25,
     24,
-    (select id from public.locais where nome = 'Linha 1' limit 1),
+    (select id from public.locais where nome = 'Linha 02 - Producao' limit 1),
     (select id from public.tags where codigo = 'MEC' limit 1),
     (select st.id from public.sub_tags st join public.tags t on t.id = st.tag_id where t.codigo = 'MEC' and st.codigo = 'TRM' limit 1)
   ),
@@ -237,7 +237,7 @@ values
     'Bianca Torres',
     42,
     31,
-    (select id from public.locais where nome = 'Linha 1' limit 1),
+    (select id from public.locais where nome = 'Linha 03 - Producao' limit 1),
     (select id from public.tags where codigo = 'ELE' limit 1),
     (select st.id from public.sub_tags st join public.tags t on t.id = st.tag_id where t.codigo = 'ELE' and st.codigo = 'MOT' limit 1)
   )

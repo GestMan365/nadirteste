@@ -7,20 +7,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #121212;
-      --panel: #1f1f1f;
-      --panel-2: #242424;
-      --line: #505050;
-      --line-soft: #333;
+      --bg: #071a3e;
+      --panel: #102247;
+      --panel-2: #153064;
+      --line: #315184;
+      --line-soft: #193762;
       --text: #d8d8d8;
-      --muted: #9a9a9a;
-      --green: #006915;
-      --green-2: #00a428;
-      --green-soft: #043f12;
+      --muted: #b7c7e7;
+      --green: #123f8d;
+      --green-2: #ffffff;
+      --green-soft: #0d3479;
       --cyan: #03a9f4;
-      --orange: #ff7a00;
+      --orange: #ff8a4c;
       --red: #e52626;
       --blue-gray: #8fb8c9;
+      --brand-blue: #123f8d;
+      --brand-blue-2: #0d2f73;
+      --brand-orange: #ff8a4c;
+      --brand-white: #ffffff;
     }
 
     * { box-sizing: border-box; }
@@ -28,7 +32,10 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 14% 12%, rgba(255,138,76,.16), transparent 26%),
+        radial-gradient(circle at 82% 18%, rgba(255,255,255,.10), transparent 24%),
+        linear-gradient(135deg, #071a3e 0%, #0d2f73 42%, #123f8d 100%);
       color: var(--text);
       font-family: Arial, Helvetica, sans-serif;
       font-size: 13px;
@@ -38,48 +45,73 @@
     button, input, select, textarea { font: inherit; }
 
     .topbar {
-      height: 50px;
-      background: #252525;
-      border-bottom: 1px solid #050505;
+      height: 58px;
+      background: linear-gradient(90deg, #0b2558, #123f8d 58%, #0d2f73);
+      border-bottom: 1px solid rgba(255,255,255,.12);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 18px 0 44px;
-      box-shadow: 0 2px 5px rgba(0,0,0,.55);
+      box-shadow: 0 8px 22px rgba(0,0,0,.35);
     }
 
     .brand {
       display: grid;
-      grid-template-columns: 34px auto;
+      grid-template-columns: 42px auto;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       line-height: 1;
     }
 
     .brand-mark {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: #e7e7e7;
-      color: #222;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #ffffff;
+      color: var(--brand-blue);
       display: grid;
       place-items: center;
-      font-weight: 900;
-      font-size: 20px;
+      position: relative;
+      box-shadow: 0 0 0 3px rgba(255,255,255,.14), 0 8px 18px rgba(0,0,0,.28);
+      overflow: hidden;
+      animation: logoFloat 4.5s ease-in-out infinite;
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--brand-orange);
+      box-shadow: 0 0 14px rgba(255,138,76,.75);
+    }
+
+    .brand-mark svg {
+      width: 28px;
+      height: 28px;
+      transform-origin: 50% 50%;
+      animation: wrenchTurn 3.8s ease-in-out infinite;
     }
 
     .brand-name {
-      font-size: 27px;
+      font-size: 29px;
       font-weight: 800;
       letter-spacing: -1px;
       color: #f3f3f3;
+      text-shadow: 0 3px 16px rgba(0,0,0,.22);
     }
 
+    .brand-name span { color: var(--brand-orange); }
+
     .brand-sub {
-      margin-left: 84px;
-      margin-top: -8px;
+      margin-left: 96px;
+      margin-top: -5px;
       font-size: 11px;
-      color: #fff;
+      color: rgba(255,255,255,.86);
+      letter-spacing: .7px;
     }
 
     .top-actions {
@@ -129,8 +161,8 @@
 
     .toolbar {
       height: 68px;
-      background: #171717;
-      border-bottom: 1px solid #3d3d3d;
+      background: rgba(5, 18, 43, .86);
+      border-bottom: 1px solid rgba(255,255,255,.12);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -151,9 +183,9 @@
     .search input,
     select {
       height: 32px;
-      border: 1px solid #6a6a6a;
-      background: #202020;
-      color: #cfcfcf;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.08);
+      color: #fff;
       border-radius: 3px;
       padding: 0 34px 0 6px;
       min-width: 162px;
@@ -183,8 +215,8 @@
       position: absolute;
       top: -6px;
       left: 8px;
-      background: #171717;
-      color: #8b8b8b;
+      background: #071a3e;
+      color: #d5def3;
       font-size: 10px;
       padding: 0 3px;
     }
@@ -198,23 +230,32 @@
     .square-btn {
       width: 25px;
       height: 25px;
-      border: 1px solid #555;
+      border: 1px solid rgba(255,255,255,.22);
       border-radius: 3px;
-      background: #252525;
-      color: var(--green-2);
+      background: rgba(255,255,255,.08);
+      color: var(--brand-white);
       cursor: pointer;
       display: grid;
       place-items: center;
       font-weight: 800;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
     }
 
     .square-btn.orange { color: var(--orange); }
+
+    .square-btn:hover {
+      transform: translateY(-2px) scale(1.04);
+      background: rgba(255,138,76,.18);
+      box-shadow: 0 0 16px rgba(255,138,76,.26);
+    }
 
     .workspace {
       height: calc(100vh - 118px);
       overflow: auto;
       padding: 10px 22px 18px 24px;
-      background: #151515;
+      background:
+        linear-gradient(180deg, rgba(7,26,62,.72), rgba(4,13,31,.94)),
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,.08), transparent 34%);
     }
 
     .unit {
@@ -224,8 +265,8 @@
 
     .unit-head {
       height: 32px;
-      border: 1px solid #4b4b4b;
-      background: #222;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(7,26,62,.72);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -262,21 +303,29 @@
     }
 
     .line-card {
-      border: 1px solid #555;
+      border: 1px solid rgba(255,255,255,.22);
       border-radius: 4px;
-      background: #1f1f1f;
+      background: rgba(8, 23, 52, .86);
       overflow: hidden;
       min-height: 142px;
       position: relative;
+      box-shadow: 0 8px 20px rgba(0,0,0,.22);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .line-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,138,76,.62);
+      box-shadow: 0 14px 30px rgba(0,0,0,.34), 0 0 22px rgba(255,138,76,.12);
     }
 
     .line-card.compact { min-height: 142px; }
 
     .line-header {
       height: 34px;
-      background: var(--green);
-      border-bottom: 1px solid #094b15;
-      color: #bfe7c6;
+      background: linear-gradient(90deg, #0c347d, #123f8d 62%, #0f357d);
+      border-bottom: 1px solid rgba(255,255,255,.16);
+      color: #ffffff;
       display: grid;
       grid-template-columns: 44px minmax(0, 1fr) 34px;
       align-items: center;
@@ -290,11 +339,11 @@
       width: 24px;
       height: 24px;
       margin-left: 16px;
-      border: 1px solid rgba(181, 231, 190, .65);
+      border: 1px solid rgba(255,255,255,.55);
       border-radius: 3px;
       display: grid;
       place-items: center;
-      color: #8bd099;
+      color: #ffffff;
       font-size: 17px;
     }
 
@@ -305,7 +354,7 @@
       border: 2px solid #fff;
       border-radius: 3px;
       background:
-        linear-gradient(135deg, #41d55d 0 34%, #fff176 35% 55%, #ef5350 56% 100%);
+        linear-gradient(135deg, #ffffff 0 34%, #ffcf9d 35% 55%, #ff8a4c 56% 100%);
       margin-left: 4px;
     }
 
@@ -326,7 +375,7 @@
 
     .line-body {
       margin: 0 6px 8px 12px;
-      border: 1px solid #555;
+      border: 1px solid rgba(255,255,255,.18);
       border-top: 0;
       border-radius: 0 0 4px 4px;
       min-height: 104px;
@@ -396,14 +445,22 @@
     .machine-box {
       width: 58px;
       height: 42px;
-      border: 1px solid #666;
+      border: 1px solid rgba(255,255,255,.35);
       border-radius: 4px;
-      background: #202020;
+      background: rgba(255,255,255,.06);
       display: grid;
       place-items: center;
-      color: var(--green-2);
+      color: var(--brand-white);
       position: relative;
       box-shadow: inset 0 0 0 1px rgba(0,0,0,.35);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .machine:hover .machine-box {
+      transform: translateY(-3px) scale(1.06);
+      border-color: var(--brand-orange);
+      background: rgba(255,138,76,.10);
+      box-shadow: 0 0 18px rgba(255,138,76,.35), inset 0 0 0 1px rgba(255,255,255,.08);
     }
 
     .machine-name {
@@ -431,6 +488,7 @@
       display: grid;
       place-items: center;
       z-index: 2;
+      animation: alertPulse 1.8s ease-in-out infinite;
     }
 
     .ico {
@@ -563,8 +621,8 @@
     .machine-menu {
       position: fixed;
       width: 238px;
-      background: #232323;
-      border: 1px solid #555;
+      background: #0d2f73;
+      border: 1px solid rgba(255,255,255,.26);
       box-shadow: 0 12px 28px rgba(0,0,0,.52);
       display: none;
       z-index: 30;
@@ -606,7 +664,7 @@
     .menu-item {
       height: 34px;
       border: 0;
-      border-bottom: 1px solid #666;
+      border-bottom: 1px solid rgba(255,255,255,.20);
       background: transparent;
       color: #cfcfcf;
       display: grid;
@@ -620,7 +678,10 @@
     }
 
     .menu-item:last-child { border-bottom: 0; }
-    .menu-item:hover { background: #303030; color: #fff; }
+    .menu-item:hover {
+      background: rgba(255,138,76,.18);
+      color: #fff;
+    }
 
     .menu-ico {
       width: 26px;
@@ -715,7 +776,7 @@
 
     .details-head {
       height: 38px;
-      background: var(--green);
+      background: linear-gradient(90deg, #123f8d, #0d2f73);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -736,8 +797,8 @@
       align-items: center;
       min-height: 22px;
       border-radius: 999px;
-      background: #303030;
-      border: 1px solid #555;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.22);
       color: #cfcfcf;
       padding: 0 8px;
       font-size: 11px;
@@ -756,18 +817,25 @@
 
     .tab {
       height: 30px;
-      border: 1px solid #555;
-      background: #202020;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.08);
       color: #bbb;
       border-radius: 3px;
       padding: 0 10px;
       cursor: pointer;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .tab:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,138,76,.65);
+      background: rgba(255,138,76,.12);
     }
 
     .tab.active {
-      background: var(--green);
-      color: #d7f3dc;
-      border-color: var(--green);
+      background: var(--brand-orange);
+      color: #08193a;
+      border-color: var(--brand-orange);
     }
 
     .admin-panel {
@@ -784,15 +852,15 @@
     }
 
     .card {
-      background: #202020;
-      border: 1px solid #555;
+      background: rgba(8, 23, 52, .88);
+      border: 1px solid rgba(255,255,255,.20);
       border-radius: 4px;
       overflow: hidden;
     }
 
     .card-head {
       height: 34px;
-      background: var(--green);
+      background: linear-gradient(90deg, #123f8d, #0d2f73);
       display: flex;
       align-items: center;
       padding: 0 12px;
@@ -818,10 +886,10 @@
 
     .field {
       height: 32px;
-      border: 1px solid #626262;
+      border: 1px solid rgba(255,255,255,.22);
       border-radius: 3px;
-      background: #151515;
-      color: #ddd;
+      background: rgba(255,255,255,.08);
+      color: #fff;
       padding: 0 8px;
       width: 100%;
     }
@@ -836,13 +904,20 @@
 
     .button {
       height: 32px;
-      border: 1px solid #0d841f;
+      border: 1px solid var(--brand-orange);
       border-radius: 3px;
-      background: var(--green);
-      color: #dff3e2;
+      background: var(--brand-orange);
+      color: #08193a;
       cursor: pointer;
       font-weight: 700;
       padding: 0 12px;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(255,138,76,.28);
+      filter: brightness(1.06);
     }
 
     table {
@@ -882,6 +957,28 @@
       box-shadow: 0 12px 28px rgba(0,0,0,.4);
       border: 0;
       cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .fab:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 16px 34px rgba(255,138,76,.24);
+      background: var(--brand-orange);
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+
+    @keyframes wrenchTurn {
+      0%, 100% { transform: rotate(-18deg) scale(1); }
+      50% { transform: rotate(12deg) scale(1.04); }
+    }
+
+    @keyframes alertPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(3,169,244,0); }
+      50% { transform: scale(1.12); box-shadow: 0 0 16px rgba(3,169,244,.7); }
     }
 
     @media (max-width: 980px) {
@@ -896,10 +993,14 @@
   <header class="topbar">
     <div>
       <div class="brand">
-        <div class="brand-mark">G</div>
-        <div class="brand-name">GestMan365</div>
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" role="img">
+            <path fill="currentColor" d="M43.2 7.4c-4.9-1.5-10.4-.3-14.3 3.6-4.2 4.2-5.2 10.5-3 15.7L8.8 43.8c-2.8 2.8-2.8 7.4 0 10.2l1.2 1.2c2.8 2.8 7.4 2.8 10.2 0l17.1-17.1c5.2 2.2 11.5 1.2 15.7-3 3.9-3.9 5.1-9.4 3.6-14.3l-9.4 9.4-8.1-2.1-2.1-8.1 9.4-9.4c-1-.5-2.1-.9-3.2-1.2ZM15.2 51.9a3.3 3.3 0 1 1 0-6.6 3.3 3.3 0 0 1 0 6.6Z"/>
+          </svg>
+        </div>
+        <div class="brand-name">GestMan<span>365</span></div>
       </div>
-      <div class="brand-sub">industrial intelligence</div>
+      <div class="brand-sub">industrial maintenance intelligence</div>
     </div>
     <div class="top-actions" aria-label="Atalhos">
       <div class="top-icon">⌂</div>
@@ -954,7 +1055,7 @@
             <label>Tipo
               <select class="field" name="tipo"><option>Linha</option><option>Area</option><option>Celula</option><option>Sala</option></select>
             </label>
-            <label>Cor <input class="field" name="cor" value="#006915"></label>
+            <label>Cor <input class="field" name="cor" value="#123f8d"></label>
             <label>Codigo visual <input class="field" name="codigo_visual" placeholder="L12"></label>
             <div class="full"><button class="button" type="submit">Salvar local</button></div>
           </form>
@@ -1054,7 +1155,7 @@
         id: `loc-${index + 1}`,
         nome: `Linha ${String(index + 1).padStart(2, "0")} - Producao`,
         tipo: "Linha",
-        cor: "#006915",
+        cor: "#123f8d",
         codigo_visual: `L${String(index + 1).padStart(2, "0")}`
       })),
       tags: [
