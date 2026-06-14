@@ -376,6 +376,10 @@
       display: grid;
       justify-items: center;
       gap: 2px;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
     }
 
     .machine::before {
@@ -555,6 +559,159 @@
     }
 
     .details-panel.open { display: block; }
+
+    .machine-menu {
+      position: fixed;
+      width: 238px;
+      background: #232323;
+      border: 1px solid #555;
+      box-shadow: 0 12px 28px rgba(0,0,0,.52);
+      display: none;
+      z-index: 30;
+      padding: 6px 6px 6px 0;
+    }
+
+    .machine-menu.open { display: block; }
+
+    .machine-menu::before {
+      content: "";
+      position: absolute;
+      left: -8px;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background-image: radial-gradient(#777 1px, transparent 1.5px);
+      background-size: 4px 5px;
+      background-color: #242424;
+    }
+
+    .menu-close {
+      position: absolute;
+      left: -13px;
+      top: 18px;
+      width: 14px;
+      height: 14px;
+      border: 1px solid #777;
+      border-radius: 2px;
+      background: #d8d8d8;
+      color: #333;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .menu-item {
+      height: 34px;
+      border: 0;
+      border-bottom: 1px solid #666;
+      background: transparent;
+      color: #cfcfcf;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      align-items: center;
+      gap: 2px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      padding: 0 6px;
+    }
+
+    .menu-item:last-child { border-bottom: 0; }
+    .menu-item:hover { background: #303030; color: #fff; }
+
+    .menu-ico {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      color: #e9e9e9;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .menu-ico.bot {
+      width: 24px;
+      height: 18px;
+      border-radius: 4px;
+      background: #eef6ff;
+      color: #0b69a3;
+      font-size: 9px;
+      border: 1px solid #7eb7d6;
+      margin-left: 2px;
+    }
+
+    .machine-tooltip {
+      position: fixed;
+      width: 216px;
+      background: #fbfbfb;
+      color: #333;
+      border-radius: 4px;
+      border: 1px solid #cfcfcf;
+      box-shadow: 0 4px 16px rgba(0,0,0,.42);
+      display: none;
+      z-index: 40;
+      padding: 8px 9px 10px;
+      font-size: 14px;
+      line-height: 1.28;
+      pointer-events: none;
+    }
+
+    .machine-tooltip.open { display: block; }
+
+    .machine-tooltip::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -9px;
+      transform: translateX(-50%);
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-top: 9px solid #fbfbfb;
+      filter: drop-shadow(0 2px 1px rgba(0,0,0,.18));
+    }
+
+    .tooltip-head {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      min-height: 25px;
+    }
+
+    .tooltip-head + .tooltip-head { margin-top: 3px; }
+
+    .tooltip-mini {
+      width: 24px;
+      height: 24px;
+      border-radius: 3px;
+      background: #e6e6e6;
+      border: 1px solid #bdbdbd;
+      color: #7b7b7b;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+    }
+
+    .tooltip-title {
+      color: #333;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tooltip-line {
+      height: 1px;
+      background: #aaa;
+      margin: 8px 0 9px;
+    }
+
+    .tooltip-body div {
+      min-height: 18px;
+    }
 
     .details-head {
       height: 38px;
@@ -872,6 +1029,19 @@
     <div class="details-body" id="detailsBody"></div>
   </aside>
 
+  <div class="machine-menu" id="machineMenu">
+    <button class="menu-close" id="closeMachineMenu">×</button>
+    <button class="menu-item" data-action="checklists"><span class="menu-ico">☑</span><span>CheckLists</span></button>
+    <button class="menu-item" data-action="nova-os"><span class="menu-ico">⚙</span><span>Nova OS</span></button>
+    <button class="menu-item" data-action="historico"><span class="menu-ico">▦</span><span>Historico de OS's</span></button>
+    <button class="menu-item" data-action="abertas"><span class="menu-ico">▦</span><span>Listar OS's Abertas</span></button>
+    <button class="menu-item" data-action="pendencias"><span class="menu-ico">▦</span><span>Listar Pendencias Abertas</span></button>
+    <button class="menu-item" data-action="compilado"><span class="menu-ico">▦</span><span>Compilado de Checklist</span></button>
+    <button class="menu-item" data-action="especialista"><span class="menu-ico bot">BOT</span><span>Especialista GestMan365</span></button>
+  </div>
+
+  <div class="machine-tooltip" id="machineTooltip"></div>
+
   <button class="fab" id="adminFab">▦</button>
 
   <script>
@@ -925,6 +1095,9 @@
       criticidade: code.includes("OS") || code.includes("INK") ? "Alta" : machineIndex % 3 === 0 ? "Media" : "Baixa",
       status: machineIndex % 9 === 0 ? "Inspecao" : "Operando",
       responsavel: ["Manutencao", "Producao", "Confiabilidade"][machineIndex % 3],
+      marca: ["MURIEL", "BOSCH", "WEG", "ATLAS", "SIEMENS"][machineIndex % 5],
+      modelo: code,
+      descricao: descriptionFor(code),
       icone: iconFor(code),
       alertas: code.includes("INK") ? 1 : code.includes("ME-35") ? 2 : 0
     })));
@@ -934,6 +1107,7 @@
       tags: [],
       subTags: [],
       assets: [],
+      selectedAssetId: null,
       supabaseReady: false
     };
 
@@ -945,6 +1119,17 @@
       if (code.startsWith("OS") || code.startsWith("BL") || code.startsWith("RF") || code.startsWith("SLE") || code.startsWith("TNL")) return "os";
       if (code.startsWith("ILUP")) return "flow";
       return "light";
+    }
+
+    function descriptionFor(code) {
+      if (code.startsWith("RT")) return "MAQUINA DE ROTULAGEM";
+      if (code.startsWith("ME")) return "MODULO DE ENVASE";
+      if (code.startsWith("MF")) return "MODULO DE FECHAMENTO";
+      if (code.startsWith("INK")) return "SISTEMA DE INJECAO";
+      if (code.startsWith("OS")) return "ESTACAO DE OPERACAO";
+      if (code.startsWith("ILUP")) return "ILUMINACAO DE LINHA";
+      if (code.startsWith("APA")) return "APLICADOR AUTOMATICO";
+      return "EQUIPAMENTO INDUSTRIAL";
     }
 
     function newId(prefix) {
@@ -1024,7 +1209,12 @@
         `;
       }).join("");
 
-      document.querySelectorAll(".machine").forEach(button => button.addEventListener("click", () => openDetails(button.dataset.assetId)));
+      document.querySelectorAll(".machine").forEach(button => {
+        button.addEventListener("click", event => openMachineMenu(button.dataset.assetId, event));
+        button.addEventListener("mouseenter", event => showMachineTooltip(button.dataset.assetId, event));
+        button.addEventListener("mousemove", event => positionMachineTooltip(event));
+        button.addEventListener("mouseleave", hideMachineTooltip);
+      });
     }
 
     function renderAdmin() {
@@ -1061,6 +1251,123 @@
       document.getElementById("detailsPanel").classList.add("open");
     }
 
+    function openMachineMenu(assetId, event) {
+      event.stopPropagation();
+      state.selectedAssetId = assetId;
+      const menu = document.getElementById("machineMenu");
+      const rect = event.currentTarget.getBoundingClientRect();
+      const left = Math.min(window.innerWidth - 260, rect.left + 44);
+      const top = Math.min(window.innerHeight - 260, rect.top + 8);
+      menu.style.left = `${Math.max(20, left)}px`;
+      menu.style.top = `${Math.max(70, top)}px`;
+      menu.classList.add("open");
+    }
+
+    function showMachineTooltip(assetId, event) {
+      const asset = byId(state.assets, assetId);
+      if (!asset) return;
+      const tooltip = document.getElementById("machineTooltip");
+      tooltip.innerHTML = `
+        <div class="tooltip-head">
+          <span class="tooltip-mini">◆</span>
+          <span class="tooltip-title">${asset.codigo}</span>
+        </div>
+        <div class="tooltip-head">
+          <span class="tooltip-mini">⚙</span>
+          <span class="tooltip-title">${asset.setor || "MAQUINAS"}</span>
+        </div>
+        <div class="tooltip-line"></div>
+        <div class="tooltip-body">
+          <div>Marca: ${asset.marca || "MURIEL"}</div>
+          <div>Modelo: ${asset.modelo || asset.codigo}</div>
+          <div>${asset.descricao || descriptionFor(asset.codigo)}</div>
+          <div>${asset.status || "Operante"}</div>
+        </div>
+      `;
+      tooltip.classList.add("open");
+      positionMachineTooltip(event);
+    }
+
+    function positionMachineTooltip(event) {
+      const tooltip = document.getElementById("machineTooltip");
+      if (!tooltip.classList.contains("open")) return;
+      const width = 216;
+      const height = tooltip.offsetHeight || 142;
+      const left = Math.min(window.innerWidth - width - 8, Math.max(8, event.clientX - width / 2));
+      const top = Math.max(58, event.clientY - height - 18);
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    }
+
+    function hideMachineTooltip() {
+      document.getElementById("machineTooltip").classList.remove("open");
+    }
+
+    function closeMachineMenu() {
+      document.getElementById("machineMenu").classList.remove("open");
+    }
+
+    function runMachineAction(action) {
+      const asset = byId(state.assets, state.selectedAssetId);
+      if (!asset) return;
+      closeMachineMenu();
+      const content = {
+        "checklists": `
+          <div><span class="pill green">Checklist diario</span> <span class="pill orange">Inspecao semanal</span></div>
+          <div><strong>Itens principais:</strong> limpeza, ruído, temperatura, vibracao e seguranca.</div>
+          <div><strong>Ultima execucao:</strong> hoje, 08:20</div>
+        `,
+        "nova-os": `
+          <div><span class="pill red">Nova OS</span></div>
+          <div><strong>Ativo:</strong> ${asset.codigo} - ${asset.nome}</div>
+          <div><strong>Tipo sugerido:</strong> ${asset.criticidade === "Alta" ? "Corretiva urgente" : "Corretiva planejada"}</div>
+          <div><strong>Prioridade:</strong> ${asset.criticidade}</div>
+        `,
+        "historico": `
+          <div><strong>Historico de OS's</strong></div>
+          <div>OS-1048 - Ajuste mecanico - Concluida</div>
+          <div>OS-1032 - Inspecao eletrica - Concluida</div>
+          <div>OS-1019 - Troca de componente - Concluida</div>
+        `,
+        "abertas": `
+          <div><strong>OS's abertas</strong></div>
+          <div>${asset.alertas ? "OS-1051 - Verificar alarme operacional" : "Nenhuma OS aberta para este ativo."}</div>
+        `,
+        "pendencias": `
+          <div><strong>Pendencias abertas</strong></div>
+          <div>${asset.criticidade === "Alta" ? "Validar causa raiz e registrar plano de acao." : "Sem pendencias criticas."}</div>
+        `,
+        "compilado": `
+          <div><strong>Compilado de Checklist</strong></div>
+          <div>Conformidade: ${asset.criticidade === "Alta" ? "82%" : "96%"}</div>
+          <div>Itens reprovados: ${asset.criticidade === "Alta" ? "3" : "0"}</div>
+        `,
+        "especialista": `
+          <div><span class="pill green">Especialista GestMan365</span></div>
+          <div>Analise sugerida: verificar historico de falhas, alarmes recentes e padrao de repeticao deste ativo.</div>
+          <div>Proxima pergunta: qual sintoma o operador observou?</div>
+        `
+      };
+
+      const titles = {
+        "checklists": "CheckLists",
+        "nova-os": "Nova OS",
+        "historico": "Historico de OS's",
+        "abertas": "OS's Abertas",
+        "pendencias": "Pendencias Abertas",
+        "compilado": "Compilado de Checklist",
+        "especialista": "Especialista GestMan365"
+      };
+
+      document.getElementById("detailsTitle").textContent = `${titles[action]} - ${asset.codigo}`;
+      document.getElementById("detailsBody").innerHTML = `
+        <div><strong>${asset.codigo} - ${asset.nome}</strong></div>
+        <div><span class="pill ${pillClass(asset.criticidade)}">${asset.criticidade}</span> <span class="pill ${pillClass(asset.status)}">${asset.status}</span></div>
+        ${content[action]}
+      `;
+      document.getElementById("detailsPanel").classList.add("open");
+    }
+
     async function loadTable(name, fallbackRows) {
       const { data, error } = await client.from(name).select("*").order("created_at", { ascending: false });
       if (error) throw error;
@@ -1074,7 +1381,14 @@
         state.tags = await loadTable("tags", fallback.tags);
         state.subTags = await loadTable("sub_tags", fallback.subTags);
         state.assets = await loadTable("ativos", fallback.assets);
-        state.assets = state.assets.map(asset => ({ ...asset, icone: asset.icone || iconFor(asset.codigo), alertas: asset.alertas || (asset.criticidade === "Alta" ? 1 : 0) }));
+        state.assets = state.assets.map(asset => ({
+          ...asset,
+          icone: asset.icone || iconFor(asset.codigo),
+          alertas: asset.alertas || (asset.criticidade === "Alta" ? 1 : 0),
+          marca: asset.marca || "MURIEL",
+          modelo: asset.modelo || asset.codigo,
+          descricao: asset.descricao || descriptionFor(asset.codigo)
+        }));
         state.supabaseReady = true;
         document.getElementById("connectionStatus").textContent = "Supabase online";
         render();
@@ -1110,6 +1424,14 @@
     document.getElementById("searchInput").addEventListener("input", renderOverview);
     document.getElementById("regionFilter").addEventListener("change", renderOverview);
     document.getElementById("closeDetails").addEventListener("click", () => document.getElementById("detailsPanel").classList.remove("open"));
+    document.getElementById("closeMachineMenu").addEventListener("click", closeMachineMenu);
+    document.getElementById("machineMenu").addEventListener("click", event => {
+      const item = event.target.closest("[data-action]");
+      if (item) runMachineAction(item.dataset.action);
+    });
+    document.addEventListener("click", event => {
+      if (!event.target.closest(".machine-menu") && !event.target.closest(".machine")) closeMachineMenu();
+    });
     document.getElementById("adminFab").addEventListener("click", () => switchView("admin"));
 
     document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => switchView(tab.dataset.view)));
