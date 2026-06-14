@@ -12,6 +12,8 @@ create table if not exists public.ativos (
   criticidade text not null default 'Media',
   status text not null default 'Operando',
   responsavel text,
+  icone text,
+  alertas integer not null default 0,
   pos_x numeric(5,2) not null default 50,
   pos_y numeric(5,2) not null default 50,
   created_at timestamptz not null default now()
@@ -21,6 +23,7 @@ create table if not exists public.locais (
   id uuid primary key default gen_random_uuid(),
   nome text not null unique,
   tipo text not null default 'Area',
+  codigo_visual text,
   cor text not null default '#0f766e',
   x numeric(5,2) not null default 0,
   y numeric(5,2) not null default 0,
@@ -49,8 +52,11 @@ create table if not exists public.sub_tags (
 alter table public.ativos add column if not exists local_id uuid;
 alter table public.ativos add column if not exists tag_id uuid;
 alter table public.ativos add column if not exists sub_tag_id uuid;
+alter table public.ativos add column if not exists icone text;
+alter table public.ativos add column if not exists alertas integer not null default 0;
 alter table public.ativos add column if not exists pos_x numeric(5,2) not null default 50;
 alter table public.ativos add column if not exists pos_y numeric(5,2) not null default 50;
+alter table public.locais add column if not exists codigo_visual text;
 
 create table if not exists public.ordens_servico (
   id uuid primary key default gen_random_uuid(),

@@ -10,9 +10,10 @@ Sistema web inicial para gestao de manutencao, ativos, chamados, mapa industrial
 
 ## Recursos desta versao
 
-- Tela inicial com MTTR, MTBF, disponibilidade e ativos mapeados.
-- Graficos operacionais de confiabilidade e backlog.
-- Mapa visual do parque industrial.
+- Tela inicial em estilo operacional escuro, inspirada em paineis de chao de fabrica.
+- Visao por linhas de producao, com maquinas em blocos pequenos.
+- Alertas por linha e por equipamento.
+- Detalhe rapido ao clicar na maquina, com MTTR e MTBF estimados.
 - Cadastro de locais da planta.
 - Cadastro de tags e subtags.
 - Cadastro de maquinas com local, tag, subtag e posicao no mapa.
