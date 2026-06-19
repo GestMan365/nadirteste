@@ -4951,8 +4951,8 @@
             <label>Numero de Executantes</label><input class="field detail-span" id="detailExecutors" type="number" min="1" value="${order.executors || 1}">
             <label>Data e Hora de Inicio</label><input class="field detail-span" value="${formatDateTime(order.startedAt)}" readonly>
             <label>Data e Hora de Termino</label><input class="field detail-span" value="${formatDateTime(order.finishedAt)}" readonly>
-            <label>Checklist</label><textarea class="field detail-span" id="detailChecklist" placeholder="Checklist de manutencao">${order.checklist || ""}</textarea>
-            <label>Comentario</label><textarea class="field detail-span" id="detailComment" placeholder="Comentario">${order.comment || order.description || ""}</textarea>
+            <label>Descrição do defeito</label><textarea class="field detail-span" id="detailDescription" readonly>${order.description || ""}</textarea>
+            <label>Comentário</label><textarea class="field detail-span" id="detailComment" placeholder="Descreva o que foi feito pelo executante">${order.comment || ""}</textarea>
           </div>
           <div class="side-box">
             <label class="switch-line"><input type="checkbox" id="detailPending" ${order.pendingExecution ? "checked" : ""}> O.S pendente de execucao</label>
@@ -4995,9 +4995,8 @@
           executor: $("detailExecutor").value,
           executors: $("detailExecutors").value,
           requester: $("detailRequester").value,
-          checklist: $("detailChecklist").value,
           comment: $("detailComment").value,
-          description: $("detailComment").value,
+          description: item.description || "",
           pendingExecution: $("detailPending").checked,
           machineStopped: $("detailStopped").checked,
           startedAt: isRunningOrder(status) ? (item.startedAt || now) : item.startedAt || null,
@@ -5109,7 +5108,7 @@
           <label>Tipo <select class="field" id="orderType"><option>Corretiva</option><option>Preventiva</option><option>Inspecao</option></select></label>
           <label>Prioridade <select class="field" id="orderPriority"><option>Baixa</option><option>Media</option><option>Alta</option></select></label>
           <label>Data programada <input class="field" id="orderScheduled" type="date"></label>
-          <label class="full">Descricao <textarea class="field" id="orderDescription" required></textarea></label>
+          <label class="full">Descrição do defeito <textarea class="field" id="orderDescription" required ${editing ? "readonly" : ""} placeholder="Descreva o defeito informado na abertura da O.S"></textarea></label>
           ${editing ? `<div class="full side-box"><strong>Registro automatico</strong><span>Abertura: ${formatDateTime(editing.createdAt)}</span><span>Inicio: ${formatDateTime(editing.startedAt)}</span><span>Finalizacao: ${formatDateTime(editing.finishedAt)}</span><span>Status atual: ${editing.status || "Aberta"}</span></div>` : `<div class="full side-box"><strong>Registro automatico</strong><span>Status inicial: Aberta</span><span>Data e hora de abertura serao gravadas ao salvar.</span></div>`}
           <div class="full toolbar"><button class="btn primary" type="submit">Salvar O.S</button></div>
         </form>
@@ -5143,7 +5142,7 @@
           status: base.status || "Aberta",
           mttr: Number(base.mttr || 0),
           scheduledAt: $("orderScheduled").value,
-          description: $("orderDescription").value
+          description: editing ? (base.description || "") : $("orderDescription").value
         };
         state.orders = state.orders.filter(order => order.id !== payload.id).concat(payload);
         saveState(); closeModal(); render(); showToast(editing ? "O.S atualizada." : "O.S criada como aberta.");
@@ -5464,8 +5463,8 @@
               <label>Numero de Executantes</label><input class="field detail-span" id="finishExecutors" type="number" min="1" value="${order.executors || 1}">
               <label>Data e Hora de Inicio</label><input class="field detail-span" value="${formatDateTime(order.startedAt)}" readonly>
               <label>Data e Hora de Termino</label><input class="field detail-span" value="${formatDateTime(Date.now())}" readonly>
-              <label>Checklist</label><textarea class="field detail-span" id="finishChecklist" placeholder="Checklist de manutencao">${order.checklist || ""}</textarea>
-              <label>Comentario</label><textarea class="field detail-span" id="finishComment" placeholder="Comentario">${order.comment || order.description || ""}</textarea>
+              <label>Descrição do defeito</label><textarea class="field detail-span" id="finishDescription" readonly>${order.description || ""}</textarea>
+              <label>Comentário</label><textarea class="field detail-span" id="finishComment" required placeholder="Descreva o que foi feito pelo executante">${order.comment || ""}</textarea>
             </div>
             <div class="side-box">
               <label class="switch-line"><input type="checkbox" id="finishPending" ${order.pendingExecution ? "checked" : ""}> O.S pendente de execucao</label>
@@ -5512,9 +5511,8 @@
           durationHours: $("finishHours").value,
           executor: $("finishExecutor").value,
           executors: $("finishExecutors").value,
-          checklist: $("finishChecklist").value,
           comment: $("finishComment").value,
-          description: $("finishComment").value,
+          description: order.description || "",
           pendingExecution: $("finishPending").checked,
           machineStopped: $("finishStopped").checked,
           status: "Concluida",
