@@ -1553,29 +1553,29 @@
       border: 1px solid rgba(255,255,255,.16);
       border-radius: 8px;
       background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.045));
-      box-shadow: 0 14px 32px rgba(0,0,0,.18);
-      padding: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.12);
+      padding: 10px;
       display: grid;
-      gap: 12px;
+      gap: 8px;
     }
 
     .os-live-head {
       display: grid;
-      grid-template-columns: 54px minmax(0, 1fr) auto;
-      gap: 10px;
+      grid-template-columns: 42px minmax(0, 1fr) auto;
+      gap: 8px;
       align-items: center;
     }
 
     .executor-photo {
-      width: 54px;
-      height: 54px;
+      width: 42px;
+      height: 42px;
       border-radius: 999px;
       overflow: hidden;
       display: grid;
       place-items: center;
       background: linear-gradient(135deg, var(--blue-700), var(--orange));
       color: #fff;
-      font-size: 17px;
+      font-size: 14px;
       font-weight: 900;
       border: 2px solid rgba(255,255,255,.78);
       box-shadow: 0 8px 18px rgba(0,0,0,.18);
@@ -1612,8 +1612,8 @@
     }
 
     .os-live-number {
-      min-width: 72px;
-      min-height: 32px;
+      min-width: 66px;
+      min-height: 28px;
       border-radius: 999px;
       background: rgba(255,138,76,.18);
       color: var(--orange);
@@ -1626,15 +1626,15 @@
 
     .os-live-data {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
     }
 
     .os-live-data span {
       border: 1px solid rgba(255,255,255,.13);
       border-radius: 6px;
       background: rgba(255,255,255,.055);
-      padding: 8px;
+      padding: 6px 7px;
       display: grid;
       gap: 3px;
       color: var(--ink);
@@ -1650,10 +1650,11 @@
 
     .os-live-desc {
       border-left: 3px solid var(--orange);
-      padding-left: 9px;
+      padding-left: 8px;
       color: var(--muted);
-      line-height: 1.35;
-      min-height: 36px;
+      line-height: 1.25;
+      min-height: 28px;
+      font-size: 12px;
     }
 
     .os-live-foot {
@@ -1672,6 +1673,18 @@
       font-weight: 900;
     }
 
+    .live-dot.recent {
+      color: #ef4444;
+    }
+
+    .live-dot.waiting {
+      color: #d97706;
+    }
+
+    .live-dot.running {
+      color: var(--ok);
+    }
+
     .live-dot::before {
       content: "";
       width: 9px;
@@ -1680,6 +1693,21 @@
       background: var(--ok);
       box-shadow: 0 0 0 0 rgba(74,222,128,.55);
       animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    .live-dot.recent::before {
+      background: #ef4444;
+      box-shadow: 0 0 0 0 rgba(239,68,68,.6);
+    }
+
+    .live-dot.waiting::before {
+      background: #f59e0b;
+      box-shadow: 0 0 0 0 rgba(245,158,11,.6);
+    }
+
+    .live-dot.running::before {
+      background: var(--ok);
+      box-shadow: 0 0 0 0 rgba(74,222,128,.55);
     }
 
     body.panel-mode {
@@ -1718,7 +1746,7 @@
     }
 
     body.panel-mode .os-live-card {
-      min-height: 260px;
+      min-height: 0;
     }
 
     .os-panel-actions {
@@ -4632,27 +4660,37 @@
           ${visible.map(order => {
             const running = isRunningOrder(order.status);
             const executor = order.executor || "Sem executante";
+            const asset = byId(state.assets, order.assetId) || {};
+            const location = byId(state.locations, asset.locationId) || {};
+            const ageMs = Date.now() - Number(order.createdAt || Date.now());
+            const liveState = running
+              ? { className: "running", label: "EM EXECUÇÃO" }
+              : ageMs <= 5 * 60 * 1000
+                ? { className: "recent", label: "ABERTA RECENTE" }
+                : { className: "waiting", label: "AGUARDANDO ATENDIMENTO" };
             return `
               <article class="os-live-card">
                 <div class="os-live-head">
                   ${executorPhotoHtml(executor)}
                   <div class="os-live-title">
                     <strong>${escapeHtml(executor)}</strong>
-                    <span>${escapeHtml(machineName(order.assetId))}</span>
+                    <span>${escapeHtml(asset.code || "-")} - ${escapeHtml(asset.name || "Equipamento")}</span>
                   </div>
                   <div class="os-live-number">${order.number}</div>
                 </div>
                 <div class="os-live-data">
                   <span><small>Status</small>${tag(order.status)}</span>
                   <span><small>Prioridade</small>${tag(order.priority)}</span>
-                  <span><small>Tipo</small>${order.type || "-"}</span>
+                  <span><small>Tipo</small>${escapeHtml(order.type || "-")}</span>
                   <span><small>${running ? "Em atendimento" : "Aberta há"}</small>${elapsedLabel(running ? order.startedAt : order.createdAt)}</span>
-                  <span><small>Abertura</small>${formatDateTime(order.createdAt)}</span>
-                  <span><small>Início</small>${formatDateTime(order.startedAt)}</span>
+                  <span><small>Código</small>${escapeHtml(asset.code || "-")}</span>
+                  <span><small>Região</small>${escapeHtml(regionName(location.regionId))}</span>
+                  <span><small>Local</small>${escapeHtml(location.name || "-")}</span>
+                  <span><small>Solicitante</small>${escapeHtml(order.requester || "-")}</span>
                 </div>
                 <div class="os-live-desc">${escapeHtml(order.description || "Sem descrição informada.")}</div>
                 <div class="os-live-foot">
-                  <span class="live-dot">${running ? "ATENDIMENTO EM TEMPO REAL" : "AGUARDANDO INÍCIO"}</span>
+                  <span class="live-dot ${liveState.className}">${liveState.label}</span>
                   <button class="btn" onclick="showOrderDetails('${order.id}')">${actionIcon("details", "edit")}Detalhes</button>
                 </div>
               </article>
