@@ -2447,6 +2447,76 @@
       .form { grid-template-columns: 1fr !important; }
       .btn { min-width: 0; max-width: 100%; white-space: normal; }
       table { min-width: 640px; }
+      #dashboard .table-wrap,
+      #reports .table-wrap,
+      #checklists .table-wrap {
+        overflow: visible;
+      }
+      #dashboard table,
+      #reports table,
+      #checklists table {
+        min-width: 0;
+        width: 100%;
+      }
+      #dashboard thead,
+      #reports thead,
+      #checklists thead {
+        display: none;
+      }
+      #dashboard tbody,
+      #reports tbody,
+      #checklists tbody,
+      #dashboard tr,
+      #reports tr,
+      #checklists tr,
+      #dashboard td,
+      #reports td,
+      #checklists td {
+        display: block;
+        width: 100%;
+      }
+      #dashboard tr,
+      #reports tr,
+      #checklists tr {
+        border: 1px solid rgba(13,47,115,.16);
+        border-radius: 8px;
+        background: rgba(255,255,255,.68);
+        margin: 10px 0;
+        overflow: hidden;
+      }
+      #dashboard td,
+      #reports td,
+      #checklists td {
+        border-bottom: 1px solid rgba(13,47,115,.12);
+        padding: 9px 10px;
+        white-space: normal;
+        text-align: right;
+      }
+      #dashboard td::before,
+      #reports td::before,
+      #checklists td::before {
+        content: attr(data-label);
+        float: left;
+        max-width: 48%;
+        color: var(--muted);
+        font-weight: 900;
+        text-align: left;
+      }
+      #dashboard td.empty,
+      #reports td.empty,
+      #checklists td.empty {
+        text-align: center;
+      }
+      #dashboard td.empty::before,
+      #reports td.empty::before,
+      #checklists td.empty::before {
+        content: "";
+      }
+      #dashboard .os-panel-actions,
+      #reports .os-panel-actions,
+      #checklists .os-panel-actions {
+        justify-content: flex-end;
+      }
       .map-shell {
         display: block;
         overflow-x: auto;
@@ -3750,14 +3820,14 @@
         stops[key].hours += Number(order.mttr || 0);
       });
       const rows = Object.values(stops).sort((a, b) => b.count - a.count || b.hours - a.hours).slice(0, 10);
-      target.innerHTML = rows.map((item, index) => `<tr><td>${index + 1}</td><td>${item.machine}</td><td>${item.count}</td><td>${item.hours.toFixed(1)}H</td></tr>`).join("") || `<tr><td colspan="4" class="empty">Nenhuma parada registrada.</td></tr>`;
+      target.innerHTML = rows.map((item, index) => `<tr><td data-label="#">${index + 1}</td><td data-label="Equipamento">${item.machine}</td><td data-label="Paradas">${item.count}</td><td data-label="Tempo">${item.hours.toFixed(1)}H</td></tr>`).join("") || `<tr><td colspan="4" class="empty">Nenhuma parada registrada.</td></tr>`;
     }
 
     function renderDashboardExecutors() {
       const target = $("dashboardExecutorRows");
       if (!target) return;
       const rows = executorStatsRows().slice(0, 10);
-      target.innerHTML = rows.map(item => `<tr><td>${escapeHtml(item.name)}</td><td>${item.total}</td><td>${item.todayHours.toFixed(1)}H</td><td>${item.monthHours.toFixed(1)}H</td></tr>`).join("") || `<tr><td colspan="4" class="empty">Nenhum executante registrado.</td></tr>`;
+      target.innerHTML = rows.map(item => `<tr><td data-label="Executante">${escapeHtml(item.name)}</td><td data-label="Ordens">${item.total}</td><td data-label="Tempo hoje">${item.todayHours.toFixed(1)}H</td><td data-label="Total mês">${item.monthHours.toFixed(1)}H</td></tr>`).join("") || `<tr><td colspan="4" class="empty">Nenhum executante registrado.</td></tr>`;
     }
 
     function renderAssistantSummary() {
@@ -4228,13 +4298,13 @@
             <tbody>
               ${visible.map(order => `
                 <tr>
-                  <td>${order.number}</td>
-                  <td>${machineName(order.assetId)}</td>
-                  <td>${order.type || "-"}</td>
-                  <td>${tag(order.priority)}</td>
-                  <td>${tag(order.status)}</td>
-                  <td>${order.executor || "Sem executante"}</td>
-                  <td><div class="os-panel-actions">
+                  <td data-label="O.S">${order.number}</td>
+                  <td data-label="Equipamento">${machineName(order.assetId)}</td>
+                  <td data-label="Tipo">${order.type || "-"}</td>
+                  <td data-label="Prioridade">${tag(order.priority)}</td>
+                  <td data-label="Status">${tag(order.status)}</td>
+                  <td data-label="Executante">${order.executor || "Sem executante"}</td>
+                  <td data-label="Ações"><div class="os-panel-actions">
                     <button class="btn" onclick="showOrderDetails('${order.id}')">${actionIcon("details", "edit")}Detalhes</button>
                   </div></td>
                 </tr>
