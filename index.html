@@ -2982,6 +2982,9 @@
       <button class="tab active" data-view="dashboard"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>DASHBOARD</span></button>
       <button class="tab" data-view="map"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg></span><span>MAPA INDUSTRIAL</span></button>
       <button class="tab" data-view="assets"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 17h16v4H4z"/><path d="M7 17V9h10v8"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M12 9V3M9 5h6"/></svg></span><span>EQUIPAMENTOS</span></button>
+      <button class="tab" data-view="suppliers"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9 21v-6h6v6"/></svg></span><span>FORNECEDORES</span></button>
+      <button class="tab" data-view="stock"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 7h16v13H4z"/><path d="M4 7l3-4h10l3 4"/><path d="M9 12h6"/></svg></span><span>ESTOQUE</span></button>
+      <button class="tab" data-view="spares"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5 5L4 17v3h3l5.7-5.7a4 4 0 0 0 5-5l-2.8 2.8-3-3 2.8-2.8Z"/></svg></span><span>PEÇAS</span></button>
       <button class="tab" data-view="locations"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M6 21V8l6-5 6 5v13"/><path d="M10 21v-6h4v6"/></svg></span><span>REGIÕES</span></button>
       <button class="tab" data-view="orders"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M7 3h10l3 3v15H4V3h3z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span><span>ORDENS</span></button>
       <button class="tab" data-view="calendar"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><span>CALENDÁRIO</span></button>
@@ -3092,6 +3095,74 @@
         <div class="panel">
           <div class="panel-head"><div class="panel-title">Equipamentos cadastrados</div></div>
           <div class="table-wrap"><table><thead><tr><th>Tag</th><th>Equipamento</th><th>Região / local de instalação</th><th>Criticidade</th><th>Status</th><th>Ações</th></tr></thead><tbody id="assetRows"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="suppliers">
+      <div class="grid admin-grid">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title" id="supplierFormTitle">Criar fornecedor</div></div>
+          <form class="form" id="supplierForm">
+            <input type="hidden" id="supplierId">
+            <label>Razão social <input class="field" id="supplierLegalName" required placeholder="Fornecedor LTDA"></label>
+            <label>Fantasia <input class="field" id="supplierTradeName" placeholder="Nome fantasia"></label>
+            <label>CNPJ <input class="field" id="supplierCnpj" placeholder="00.000.000/0000-00"></label>
+            <label>Telefone <input class="field" id="supplierPhone" placeholder="(00) 00000-0000"></label>
+            <label>Email <input class="field" id="supplierEmail" placeholder="compras@fornecedor.com"></label>
+            <label>Status <select class="field" id="supplierActive"><option value="true">Ativo</option><option value="false">Inativo</option></select></label>
+            <label class="full">Observação <textarea class="field" id="supplierNote" placeholder="Condições, contato principal ou observações"></textarea></label>
+            <div class="full toolbar"><button class="btn primary" type="submit">Salvar fornecedor</button><button class="btn" type="button" id="resetSupplierForm">Limpar formulário</button></div>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Fornecedores cadastrados</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Razão social</th><th>Fantasia</th><th>CNPJ</th><th>Contato</th><th>Status</th><th>Ações</th></tr></thead><tbody id="supplierRows"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="stock">
+      <div class="grid admin-grid">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title" id="stockFormTitle">Criar estoque</div></div>
+          <form class="form" id="stockForm">
+            <input type="hidden" id="stockId">
+            <label>Nome <input class="field" id="stockName" required placeholder="Almoxarifado central"></label>
+            <label>Localização <input class="field" id="stockPlace" placeholder="Prédio, sala ou setor"></label>
+            <label>Responsável <input class="field" id="stockOwner" placeholder="Nome do responsável"></label>
+            <label>Status <select class="field" id="stockActive"><option value="true">Ativo</option><option value="false">Inativo</option></select></label>
+            <div class="full toolbar"><button class="btn primary" type="submit">Salvar estoque</button><button class="btn" type="button" id="resetStockForm">Limpar formulário</button></div>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Estoques cadastrados</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Estoque</th><th>Localização</th><th>Responsável</th><th>Status</th><th>Ações</th></tr></thead><tbody id="stockRows"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="spares">
+      <div class="grid admin-grid">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title" id="spareFormTitle">Criar peça</div></div>
+          <form class="form" id="spareForm">
+            <input type="hidden" id="spareId">
+            <label>Código interno <input class="field" id="spareCode" required placeholder="ROL-6204"></label>
+            <label>Nome <input class="field" id="spareName" required placeholder="Rolamento 6204"></label>
+            <label>Fornecedor <select class="field" id="spareSupplier"></select></label>
+            <label>Cód. fornecedor <input class="field" id="spareSupplierCode" placeholder="Código no fornecedor"></label>
+            <label>Unidade <input class="field" id="spareUnit" value="UN" placeholder="UN, KG, L"></label>
+            <label>Localização <input class="field" id="sparePlace" placeholder="Rua, prateleira, gaveta"></label>
+            <label>Saldo atual <input class="field" id="spareBalance" type="number" step="0.01" value="0"></label>
+            <label>Saldo mínimo <input class="field" id="spareMinimum" type="number" step="0.01" value="0"></label>
+            <label class="full">Descrição <textarea class="field" id="spareDescription" placeholder="Aplicação, especificação ou observação técnica"></textarea></label>
+            <div class="full toolbar"><button class="btn primary" type="submit">Salvar peça</button><button class="btn" type="button" id="resetSpareForm">Limpar formulário</button></div>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Peças cadastradas</div></div>
+          <div class="table-wrap"><table><thead><tr><th>Código</th><th>Peça</th><th>Fornecedor</th><th>Saldo</th><th>Mínimo</th><th>Ações</th></tr></thead><tbody id="spareRows"></tbody></table></div>
         </div>
       </div>
     </section>
@@ -3307,9 +3378,9 @@
     const SUPABASE_URL = "https://zkkyiqtzmimcoderjrrm.supabase.co";
     const SUPABASE_KEY = "sb_publishable_h88SLb98aMdmGCJvEO6yFw_QuJ4I3bI";
     const SUPABASE_READY = SUPABASE_URL.startsWith("https://") && SUPABASE_KEY.startsWith("sb_");
-    const SUPABASE_TABLES_DELETE_ORDER = ["eventos_ordem_servico", "movimentacoes_tags", "checklists", "ordens_servico", "subtags_equipamento", "equipamentos", "locais_instalacao", "regioes", "perfis"];
-    const SUPABASE_TABLES_INSERT_ORDER = ["perfis", "regioes", "locais_instalacao", "equipamentos", "subtags_equipamento", "ordens_servico", "checklists", "movimentacoes_tags"];
-    const SUPABASE_TABLES_UPSERT_ORDER = ["regioes", "locais_instalacao", "equipamentos", "subtags_equipamento", "ordens_servico", "checklists", "movimentacoes_tags"];
+    const SUPABASE_TABLES_DELETE_ORDER = ["eventos_ordem_servico", "movimentacoes_tags", "checklists", "ordens_servico", "subtags_equipamento", "equipamentos", "locais_instalacao", "regioes", "pecas", "estoques", "fornecedores", "perfis"];
+    const SUPABASE_TABLES_INSERT_ORDER = ["perfis", "fornecedores", "estoques", "pecas", "regioes", "locais_instalacao", "equipamentos", "subtags_equipamento", "ordens_servico", "checklists", "movimentacoes_tags"];
+    const SUPABASE_TABLES_UPSERT_ORDER = ["fornecedores", "estoques", "pecas", "regioes", "locais_instalacao", "equipamentos", "subtags_equipamento", "ordens_servico", "checklists", "movimentacoes_tags"];
 
     const emptyState = () => ({
       regions: [],
@@ -3320,6 +3391,9 @@
       orders: [],
       checklists: [],
       movements: [],
+      suppliers: [],
+      stockLocations: [],
+      spareParts: [],
       profile: { name: "Administrador", role: "Administrador", email: "", photo: "" }
     });
 
@@ -3361,6 +3435,9 @@
       normalized.regions = Array.isArray(normalized.regions) ? normalized.regions : [];
       normalized.locations = Array.isArray(normalized.locations) ? normalized.locations : [];
       normalized.assets = Array.isArray(normalized.assets) ? normalized.assets : [];
+      normalized.suppliers = Array.isArray(normalized.suppliers) ? normalized.suppliers : [];
+      normalized.stockLocations = Array.isArray(normalized.stockLocations) ? normalized.stockLocations : [];
+      normalized.spareParts = Array.isArray(normalized.spareParts) ? normalized.spareParts : [];
       normalized.locations = normalized.locations.map((location, index) => ({
         ...location,
         regionId: location.regionId || "",
@@ -3560,6 +3637,46 @@
       };
     }
 
+    function supplierDbRow(item) {
+      return {
+        id: item.id,
+        razao_social: item.legalName || "Fornecedor",
+        fantasia: item.tradeName || null,
+        cnpj: item.cnpj || null,
+        telefone: item.phone || null,
+        email: item.email || null,
+        observacao: item.note || null,
+        ativo: item.active !== false
+      };
+    }
+
+    function stockDbRow(item) {
+      return {
+        id: item.id,
+        nome: item.name || "Estoque",
+        localizacao: item.place || null,
+        responsavel: item.owner || null,
+        ativo: item.active !== false
+      };
+    }
+
+    function spareDbRow(item) {
+      return {
+        id: item.id,
+        codigo: item.code || "SEM-CODIGO",
+        nome: item.name || "Peca",
+        fornecedor_id: item.supplierId || null,
+        cod_fornecedor: item.supplierCode || null,
+        descricao: item.description || null,
+        observacao: item.note || null,
+        unidade: item.unit || "UN",
+        saldo: Number(item.balance || 0),
+        saldo_minimo: Number(item.minimum || 0),
+        localizacao: item.place || null,
+        ativo: item.active !== false
+      };
+    }
+
     function dbPayload() {
       return {
         perfis: [{
@@ -3569,6 +3686,9 @@
           foto_url: state.profile.photo || null,
           tipo: "admin"
         }],
+        fornecedores: state.suppliers.map(supplierDbRow),
+        estoques: state.stockLocations.map(stockDbRow),
+        pecas: state.spareParts.map(spareDbRow),
         regioes: state.regions.map(region => ({
           id: region.id,
           nome: region.name,
@@ -3624,7 +3744,10 @@
         data.assets?.length ||
         data.orders?.length ||
         data.checklists?.length ||
-        data.movements?.length
+        data.movements?.length ||
+        data.suppliers?.length ||
+        data.stockLocations?.length ||
+        data.spareParts?.length
       );
     }
 
@@ -3635,7 +3758,10 @@
         data.equipamentos?.length ||
         data.ordens_servico?.length ||
         data.checklists?.length ||
-        data.movimentacoes_tags?.length
+        data.movimentacoes_tags?.length ||
+        data.fornecedores?.length ||
+        data.estoques?.length ||
+        data.pecas?.length
       );
     }
 
@@ -3659,7 +3785,10 @@
         assets: mergeById(remote.assets, local.assets),
         orders: mergeById(remote.orders, local.orders),
         checklists: mergeById(remote.checklists, local.checklists),
-        movements: mergeById(remote.movements, local.movements)
+        movements: mergeById(remote.movements, local.movements),
+        suppliers: mergeById(remote.suppliers, local.suppliers),
+        stockLocations: mergeById(remote.stockLocations, local.stockLocations),
+        spareParts: mergeById(remote.spareParts, local.spareParts)
       });
     }
 
@@ -3733,6 +3862,37 @@
         && (!remoteProfile.name || remoteProfile.name === "Administrador");
       return normalizeState({
         profile: useLocalProfile ? { ...remoteProfile, ...localProfile } : remoteProfile,
+        suppliers: (data.fornecedores || []).map(item => ({
+          id: item.id,
+          legalName: item.razao_social,
+          tradeName: item.fantasia || "",
+          cnpj: item.cnpj || "",
+          phone: item.telefone || "",
+          email: item.email || "",
+          note: item.observacao || "",
+          active: item.ativo !== false
+        })),
+        stockLocations: (data.estoques || []).map(item => ({
+          id: item.id,
+          name: item.nome,
+          place: item.localizacao || "",
+          owner: item.responsavel || "",
+          active: item.ativo !== false
+        })),
+        spareParts: (data.pecas || []).map(item => ({
+          id: item.id,
+          code: item.codigo,
+          name: item.nome,
+          supplierId: item.fornecedor_id || "",
+          supplierCode: item.cod_fornecedor || "",
+          unit: item.unidade || "UN",
+          balance: Number(item.saldo || 0),
+          minimum: Number(item.saldo_minimo || 0),
+          place: item.localizacao || "",
+          description: item.descricao || "",
+          note: item.observacao || "",
+          active: item.ativo !== false
+        })),
         regions: (data.regioes || []).map(item => ({ id: item.id, name: item.nome, description: item.descricao || "" })),
         locations: (data.locais_instalacao || []).map(item => ({ id: item.id, regionId: item.regiao_id, name: item.nome, type: item.tipo, order: item.ordem || 0 })),
         assets: (data.equipamentos || []).map(item => ({
@@ -3815,8 +3975,11 @@
       }
       try {
         isLoadingRemote = true;
-        const [perfis, regioes, locais, equipamentos, ordens, checklists, movimentos] = await Promise.all([
+        const [perfis, fornecedores, estoques, pecas, regioes, locais, equipamentos, ordens, checklists, movimentos] = await Promise.all([
           supabaseFetch("perfis?select=*&order=created_at.asc"),
+          supabaseFetch("fornecedores?select=*&order=created_at.asc"),
+          supabaseFetch("estoques?select=*&order=created_at.asc"),
+          supabaseFetch("pecas?select=*&order=created_at.asc"),
           supabaseFetch("regioes?select=*&order=created_at.asc"),
           supabaseFetch("locais_instalacao?select=*&order=created_at.asc"),
           supabaseFetch("equipamentos?select=*&order=created_at.asc"),
@@ -3824,7 +3987,7 @@
           supabaseFetch("checklists?select=*&order=created_at.asc"),
           supabaseFetch("movimentacoes_tags?select=*&order=data_movimentacao.desc")
         ]);
-        const remoteData = { perfis, regioes, locais_instalacao: locais, equipamentos, ordens_servico: ordens, checklists, movimentacoes_tags: movimentos };
+        const remoteData = { perfis, fornecedores, estoques, pecas, regioes, locais_instalacao: locais, equipamentos, ordens_servico: ordens, checklists, movimentacoes_tags: movimentos };
         if (!remoteHasBusinessData(remoteData) && hasBusinessData(state)) {
           if (showMessage) showToast("Supabase vazio. Mantive os dados locais para evitar perda.");
           await syncSupabaseNow(false);
@@ -5072,6 +5235,11 @@
       $("assetTag").innerHTML = tagOptions;
       $("subtagParent").innerHTML = tagOptions;
       $("assetSubtag").innerHTML = [`<option value="">Sem subtag</option>`].concat(state.subtags.map(item => `<option value="${item.id}">${item.code} - ${item.name}</option>`)).join("");
+      if ($("spareSupplier")) $("spareSupplier").innerHTML = [`<option value="">Sem fornecedor</option>`].concat(state.suppliers.map(item => `<option value="${item.id}">${item.legalName}</option>`)).join("");
+    }
+
+    function supplierName(id) {
+      return byId(state.suppliers, id)?.legalName || "Sem fornecedor";
     }
 
     function renderTables() {
@@ -5081,6 +5249,18 @@
       $("assetRows").innerHTML = state.assets.filter(asset => filter(`${asset.code} ${asset.name} ${locationName(asset.locationId)}`)).map(asset => `
         <tr><td>${asset.code}</td><td>${asset.name}</td><td>${locationName(asset.locationId)}</td><td>${tag(asset.criticality)}</td><td>${tag(asset.status)}</td><td class="actions"><button class="btn" onclick="duplicateAsset('${asset.id}')">Copiar</button><button class="btn" onclick="editAsset('${asset.id}')">Editar</button><button class="btn danger" onclick="deleteAsset('${asset.id}')">Excluir</button></td></tr>
       `).join("") || `<tr><td colspan="6" class="empty">Nenhum equipamento criado.</td></tr>`;
+
+      $("supplierRows").innerHTML = state.suppliers.filter(item => filter(`${item.legalName} ${item.tradeName} ${item.cnpj}`)).map(item => `
+        <tr><td>${item.legalName}</td><td>${item.tradeName || "-"}</td><td>${item.cnpj || "-"}</td><td>${item.phone || item.email || "-"}</td><td>${tag(item.active === false ? "Inativo" : "Ativo")}</td><td class="actions"><button class="btn" onclick="editSupplier('${item.id}')">Editar</button><button class="btn danger" onclick="deleteSupplier('${item.id}')">Excluir</button></td></tr>
+      `).join("") || `<tr><td colspan="6" class="empty">Nenhum fornecedor criado.</td></tr>`;
+
+      $("stockRows").innerHTML = state.stockLocations.filter(item => filter(`${item.name} ${item.place} ${item.owner}`)).map(item => `
+        <tr><td>${item.name}</td><td>${item.place || "-"}</td><td>${item.owner || "-"}</td><td>${tag(item.active === false ? "Inativo" : "Ativo")}</td><td class="actions"><button class="btn" onclick="editStock('${item.id}')">Editar</button><button class="btn danger" onclick="deleteStock('${item.id}')">Excluir</button></td></tr>
+      `).join("") || `<tr><td colspan="5" class="empty">Nenhum estoque criado.</td></tr>`;
+
+      $("spareRows").innerHTML = state.spareParts.filter(item => filter(`${item.code} ${item.name} ${supplierName(item.supplierId)}`)).map(item => `
+        <tr><td>${item.code}</td><td>${item.name}</td><td>${supplierName(item.supplierId)}</td><td>${Number(item.balance || 0)} ${item.unit || "UN"}</td><td>${Number(item.minimum || 0)} ${item.unit || "UN"}</td><td class="actions"><button class="btn" onclick="editSpare('${item.id}')">Editar</button><button class="btn danger" onclick="deleteSpare('${item.id}')">Excluir</button></td></tr>
+      `).join("") || `<tr><td colspan="6" class="empty">Nenhuma peça criada.</td></tr>`;
 
       $("regionRows").innerHTML = state.regions.map(item => {
         const localCount = state.locations.filter(location => location.regionId === item.id).length;
@@ -5220,6 +5400,84 @@
 
     function resetTagForm() { $("tagForm").reset(); $("tagId").value = ""; $("tagFormTitle").textContent = "Criar tag/subtag"; }
     function resetSubtagForm() { $("subtagForm").reset(); $("subtagId").value = ""; }
+
+    function resetSupplierForm() { $("supplierForm").reset(); $("supplierId").value = ""; $("supplierFormTitle").textContent = "Criar fornecedor"; }
+    function resetStockForm() { $("stockForm").reset(); $("stockId").value = ""; $("stockFormTitle").textContent = "Criar estoque"; }
+    function resetSpareForm() { $("spareForm").reset(); $("spareId").value = ""; $("spareFormTitle").textContent = "Criar peça"; $("spareUnit").value = "UN"; }
+
+    async function saveSingleSupabase(table, row) {
+      if (!SUPABASE_READY) return true;
+      try {
+        await upsertSupabaseRows(table, [row]);
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    }
+
+    function editSupplier(id) {
+      const item = byId(state.suppliers, id); if (!item) return;
+      $("supplierId").value = item.id;
+      $("supplierLegalName").value = item.legalName || "";
+      $("supplierTradeName").value = item.tradeName || "";
+      $("supplierCnpj").value = item.cnpj || "";
+      $("supplierPhone").value = item.phone || "";
+      $("supplierEmail").value = item.email || "";
+      $("supplierNote").value = item.note || "";
+      $("supplierActive").value = item.active === false ? "false" : "true";
+      $("supplierFormTitle").textContent = "Editar fornecedor";
+      setView("suppliers");
+    }
+
+    function deleteSupplier(id) {
+      if (!confirm("Excluir este fornecedor?")) return;
+      deleteSupabaseRow("fornecedores", id);
+      state.suppliers = state.suppliers.filter(item => item.id !== id);
+      state.spareParts = state.spareParts.map(item => item.supplierId === id ? { ...item, supplierId: "" } : item);
+      saveState(); render(); showToast("Fornecedor excluído.");
+    }
+
+    function editStock(id) {
+      const item = byId(state.stockLocations, id); if (!item) return;
+      $("stockId").value = item.id;
+      $("stockName").value = item.name || "";
+      $("stockPlace").value = item.place || "";
+      $("stockOwner").value = item.owner || "";
+      $("stockActive").value = item.active === false ? "false" : "true";
+      $("stockFormTitle").textContent = "Editar estoque";
+      setView("stock");
+    }
+
+    function deleteStock(id) {
+      if (!confirm("Excluir este estoque?")) return;
+      deleteSupabaseRow("estoques", id);
+      state.stockLocations = state.stockLocations.filter(item => item.id !== id);
+      saveState(); render(); showToast("Estoque excluído.");
+    }
+
+    function editSpare(id) {
+      const item = byId(state.spareParts, id); if (!item) return;
+      $("spareId").value = item.id;
+      $("spareCode").value = item.code || "";
+      $("spareName").value = item.name || "";
+      $("spareSupplier").value = item.supplierId || "";
+      $("spareSupplierCode").value = item.supplierCode || "";
+      $("spareUnit").value = item.unit || "UN";
+      $("sparePlace").value = item.place || "";
+      $("spareBalance").value = item.balance || 0;
+      $("spareMinimum").value = item.minimum || 0;
+      $("spareDescription").value = item.description || "";
+      $("spareFormTitle").textContent = "Editar peça";
+      setView("spares");
+    }
+
+    function deleteSpare(id) {
+      if (!confirm("Excluir esta peça?")) return;
+      deleteSupabaseRow("pecas", id);
+      state.spareParts = state.spareParts.filter(item => item.id !== id);
+      saveState(); render(); showToast("Peça excluída.");
+    }
 
     function openMachineMenu(event, id) {
       selectedMachineId = id;
@@ -6103,7 +6361,7 @@
       if (ask) showToast("Checklist excluído.");
     }
 
-    window.editAsset = editAsset; window.deleteAsset = deleteAsset; window.duplicateAsset = duplicateAsset; window.editRegion = editRegion; window.deleteRegion = deleteRegion; window.editLocation = editLocation; window.deleteLocation = deleteLocation; window.editTag = editTag; window.deleteTag = deleteTag; window.editSubtag = editSubtag; window.deleteSubtag = deleteSubtag; window.editOrder = editOrder; window.deleteOrder = deleteOrder; window.startOrder = startOrder; window.confirmStartOrder = confirmStartOrder; window.finishOrder = finishOrder; window.showOrderDetails = showOrderDetails; window.simpleOrderAction = simpleOrderAction; window.editChecklist = editChecklist; window.deleteChecklist = deleteChecklist; window.openLocationChecklists = openLocationChecklists; window.openLocationMovements = openLocationMovements; window.moveDashboardWidget = moveDashboardWidget; window.hideDashboardWidget = hideDashboardWidget; window.openDashboardConfig = openDashboardConfig; window.saveDashboardVisibility = saveDashboardVisibility; window.resetDashboardLayout = resetDashboardLayout;
+    window.editAsset = editAsset; window.deleteAsset = deleteAsset; window.duplicateAsset = duplicateAsset; window.editRegion = editRegion; window.deleteRegion = deleteRegion; window.editLocation = editLocation; window.deleteLocation = deleteLocation; window.editTag = editTag; window.deleteTag = deleteTag; window.editSubtag = editSubtag; window.deleteSubtag = deleteSubtag; window.editSupplier = editSupplier; window.deleteSupplier = deleteSupplier; window.editStock = editStock; window.deleteStock = deleteStock; window.editSpare = editSpare; window.deleteSpare = deleteSpare; window.editOrder = editOrder; window.deleteOrder = deleteOrder; window.startOrder = startOrder; window.confirmStartOrder = confirmStartOrder; window.finishOrder = finishOrder; window.showOrderDetails = showOrderDetails; window.simpleOrderAction = simpleOrderAction; window.editChecklist = editChecklist; window.deleteChecklist = deleteChecklist; window.openLocationChecklists = openLocationChecklists; window.openLocationMovements = openLocationMovements; window.moveDashboardWidget = moveDashboardWidget; window.hideDashboardWidget = hideDashboardWidget; window.openDashboardConfig = openDashboardConfig; window.saveDashboardVisibility = saveDashboardVisibility; window.resetDashboardLayout = resetDashboardLayout;
 
     document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => {
       if (button.dataset.view === "activeOrders" && !isPanelMode()) {
@@ -6173,6 +6431,36 @@
     $("themeBtn").addEventListener("click", () => applyTheme(currentTheme === "light" ? "dark" : "light"));
     $("syncBtn").addEventListener("click", () => syncSupabaseNow(true));
 
+    $("supplierForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const id = $("supplierId").value || uid("supplier");
+      const payload = { id, legalName: value("supplierLegalName"), tradeName: value("supplierTradeName"), cnpj: value("supplierCnpj"), phone: value("supplierPhone"), email: value("supplierEmail"), note: value("supplierNote"), active: $("supplierActive").value === "true" };
+      state.suppliers = state.suppliers.filter(item => item.id !== id).concat(payload);
+      saveState();
+      const saved = await saveSingleSupabase("fornecedores", supplierDbRow(payload));
+      resetSupplierForm(); render(); showToast(saved ? "Fornecedor salvo no Supabase." : "Fornecedor salvo localmente. Sincronização pendente.");
+    });
+
+    $("stockForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const id = $("stockId").value || uid("stock");
+      const payload = { id, name: value("stockName"), place: value("stockPlace"), owner: value("stockOwner"), active: $("stockActive").value === "true" };
+      state.stockLocations = state.stockLocations.filter(item => item.id !== id).concat(payload);
+      saveState();
+      const saved = await saveSingleSupabase("estoques", stockDbRow(payload));
+      resetStockForm(); render(); showToast(saved ? "Estoque salvo no Supabase." : "Estoque salvo localmente. Sincronização pendente.");
+    });
+
+    $("spareForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const id = $("spareId").value || uid("spare");
+      const payload = { id, code: value("spareCode"), name: value("spareName"), supplierId: $("spareSupplier").value, supplierCode: value("spareSupplierCode"), unit: value("spareUnit") || "UN", place: value("sparePlace"), balance: numberValue("spareBalance"), minimum: numberValue("spareMinimum"), description: value("spareDescription"), active: true };
+      state.spareParts = state.spareParts.filter(item => item.id !== id).concat(payload);
+      saveState();
+      const saved = await saveSingleSupabase("pecas", spareDbRow(payload));
+      resetSpareForm(); render(); showToast(saved ? "Peça salva no Supabase." : "Peça salva localmente. Sincronização pendente.");
+    });
+
     $("assetForm").addEventListener("submit", event => {
       event.preventDefault();
       const id = $("assetId").value || uid("asset");
@@ -6236,6 +6524,9 @@
     $("resetLocationForm").addEventListener("click", resetLocationForm);
     $("resetTagForm").addEventListener("click", resetTagForm);
     $("resetSubtagForm").addEventListener("click", resetSubtagForm);
+    $("resetSupplierForm").addEventListener("click", resetSupplierForm);
+    $("resetStockForm").addEventListener("click", resetStockForm);
+    $("resetSpareForm").addEventListener("click", resetSpareForm);
     $("exportBtn").addEventListener("click", () => {
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
