@@ -3476,6 +3476,32 @@
       return Number.isNaN(parsed) ? null : parsed;
     }
 
+    function orderNumberValue(number) {
+      const match = String(number || "").match(/(\d+)\s*$/);
+      return match ? Number(match[1]) : 0;
+    }
+
+    function nextOrderNumber() {
+      const next = state.orders.reduce((max, order) => Math.max(max, orderNumberValue(order.number)), 0) + 1;
+      return `O.S-${String(next).padStart(4, "0")}`;
+    }
+
+    async function nextOrderNumberSafe() {
+      if (!SUPABASE_READY) return nextOrderNumber();
+      try {
+        const data = await supabaseFetch("rpc/proxima_ordem_servico_numero", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}"
+        });
+        return typeof data === "string" ? data : nextOrderNumber();
+      } catch (error) {
+        console.error(error);
+        showToast("Nao consegui buscar numero no Supabase. Usei numero local temporario.");
+        return nextOrderNumber();
+      }
+    }
+
     function supabaseHeaders(extra = {}) {
       return {
         apikey: SUPABASE_KEY,
@@ -3497,6 +3523,41 @@
       if (response.status === 204) return null;
       const text = await response.text();
       return text ? JSON.parse(text) : null;
+    }
+
+    function orderDbRow(order) {
+      return {
+        id: order.id,
+        numero: order.number,
+        equipamento_id: order.assetId || null,
+        solicitante: order.requester || "NAO INFORMADO",
+        executante: order.executor || "NAO INFORMADO",
+        tipo_servico: order.type || "Corretiva",
+        tipo_manutencao: order.maintenance || null,
+        prioridade: order.priority || "Baixa",
+        status: order.status || "Aberta",
+        descricao: order.description || "NAO INFORMADO",
+        comentario: order.comment || null,
+        categoria: order.category || null,
+        equipamento_parado: Boolean(order.machineStopped),
+        pendente_execucao: Boolean(order.pendingExecution),
+        data_abertura: isoDate(order.createdAt) || new Date().toISOString(),
+        data_inicio: isoDate(order.startedAt),
+        data_fim: isoDate(order.finishedAt),
+        mttr_horas: Number(order.mttr || 0),
+        assinatura_nome: order.signatureName || null,
+        assinatura_imagem: order.signatureImage || null,
+        epis: order.epis || {},
+        anexos: order.attachments || [],
+        detalhes: {
+          plan: order.plan || "",
+          checklist: order.checklist || "",
+          scheduledAt: order.scheduledAt || "",
+          durationDays: order.durationDays || "",
+          durationHours: order.durationHours || "",
+          executors: order.executors || 1
+        }
+      };
     }
 
     function dbPayload() {
@@ -3534,38 +3595,7 @@
           descricao: asset.description || null
         })),
         subtags_equipamento: [],
-        ordens_servico: state.orders.map(order => ({
-          id: order.id,
-          numero: order.number,
-          equipamento_id: order.assetId || null,
-          solicitante: order.requester || "NAO INFORMADO",
-          executante: order.executor || "NAO INFORMADO",
-          tipo_servico: order.type || "Corretiva",
-          tipo_manutencao: order.maintenance || null,
-          prioridade: order.priority || "Baixa",
-          status: order.status || "Aberta",
-          descricao: order.description || "NAO INFORMADO",
-          comentario: order.comment || null,
-          categoria: order.category || null,
-          equipamento_parado: Boolean(order.machineStopped),
-          pendente_execucao: Boolean(order.pendingExecution),
-          data_abertura: isoDate(order.createdAt) || new Date().toISOString(),
-          data_inicio: isoDate(order.startedAt),
-          data_fim: isoDate(order.finishedAt),
-          mttr_horas: Number(order.mttr || 0),
-          assinatura_nome: order.signatureName || null,
-          assinatura_imagem: order.signatureImage || null,
-          epis: order.epis || {},
-          anexos: order.attachments || [],
-          detalhes: {
-            plan: order.plan || "",
-            checklist: order.checklist || "",
-            scheduledAt: order.scheduledAt || "",
-            durationDays: order.durationDays || "",
-            durationHours: order.durationHours || "",
-            executors: order.executors || 1
-          }
-        })),
+        ordens_servico: state.orders.map(orderDbRow),
         checklists: state.checklists.map(item => ({
           id: item.id,
           codigo: item.code,
@@ -3640,6 +3670,17 @@
         headers: { "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" },
         body: JSON.stringify(rows)
       });
+    }
+
+    async function saveOrderSupabaseNow(order) {
+      if (!SUPABASE_READY || !order?.id) return true;
+      try {
+        await upsertSupabaseRows("ordens_servico", [orderDbRow(order)]);
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
     }
 
     async function deleteSupabaseRow(table, id) {
@@ -5472,11 +5513,11 @@
       });
     }
 
-    function simpleOrderAction(id, action) {
+    async function simpleOrderAction(id, action) {
       const order = byId(state.orders, id);
       if (!order) return;
       if (action === "copy") {
-        const clone = { ...order, id: uid("os"), number: `O.S-${String(state.orders.length + 1).padStart(4, "0")}`, status: "Aberta", createdAt: Date.now(), startedAt: null, finishedAt: null };
+        const clone = { ...order, id: uid("os"), number: await nextOrderNumberSafe(), status: "Aberta", createdAt: Date.now(), startedAt: null, finishedAt: null };
         state.orders.unshift(clone);
         saveState();
         render();
@@ -5586,14 +5627,16 @@
         $("orderScheduled").value = parseCalendarDate(editing.scheduledAt) ? calendarDateKey(parseCalendarDate(editing.scheduledAt)) : "";
         $("orderDescription").value = editing.description || "";
       }
-      $("orderForm").addEventListener("submit", event => {
+      $("orderForm").addEventListener("submit", async event => {
         event.preventDefault();
         if (!value("orderRequester") || !value("orderExecutor") || !value("orderDescription")) {
           showToast("Preencha solicitante, executante e descricao da O.S.");
           return;
         }
+        const submitButton = event.submitter;
+        if (submitButton) submitButton.disabled = true;
         const now = Date.now();
-        const base = editing || { id: uid("os"), number: `O.S-${String(state.orders.length + 1).padStart(4, "0")}`, createdAt: now, status: "Aberta", startedAt: null, finishedAt: null };
+        const base = editing || { id: uid("os"), number: await nextOrderNumberSafe(), createdAt: now, status: "Aberta", startedAt: null, finishedAt: null };
         const payload = {
           ...base,
           assetId: $("orderAsset").value,
@@ -5608,7 +5651,14 @@
           description: editing ? (base.description || "") : $("orderDescription").value
         };
         state.orders = state.orders.filter(order => order.id !== payload.id).concat(payload);
-        saveState(); closeModal(); render(); showToast(editing ? "O.S atualizada." : "O.S criada como aberta.");
+        saveState();
+        const remoteSaved = await saveOrderSupabaseNow(payload);
+        closeModal();
+        render();
+        showToast(editing
+          ? (remoteSaved ? "O.S atualizada no Supabase." : "O.S atualizada localmente. Sincronizacao pendente.")
+          : (remoteSaved ? "O.S criada e salva no Supabase." : "O.S criada localmente. Sincronizacao pendente.")
+        );
       });
     }
 
