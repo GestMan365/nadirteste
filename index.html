@@ -3453,6 +3453,7 @@
     const THEME_KEY = "gestman365-theme";
     const DASHBOARD_LAYOUT_KEY = "gestman365-dashboard-layout-v1";
     const THEME_DEFAULT_KEY = "gestman365-light-default-applied";
+    const ACTIVE_VIEW_KEY = "gestman365-active-view-v1";
     const SUPABASE_URL = "https://zkkyiqtzmimcoderjrrm.supabase.co";
     const SUPABASE_KEY = "sb_publishable_h88SLb98aMdmGCJvEO6yFw_QuJ4I3bI";
     const SUPABASE_READY = SUPABASE_URL.startsWith("https://") && SUPABASE_KEY.startsWith("sb_");
@@ -4418,9 +4419,16 @@
       syncTimer = setTimeout(() => syncSupabaseNow(false), 1200);
     }
 
-    function setView(view) {
-      document.querySelectorAll(".view").forEach(section => section.classList.toggle("active", section.id === view));
-      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === view));
+    function savedActiveView() {
+      const view = localStorage.getItem(ACTIVE_VIEW_KEY) || "dashboard";
+      return document.getElementById(view) ? view : "dashboard";
+    }
+
+    function setView(view, options = {}) {
+      const nextView = document.getElementById(view) ? view : "dashboard";
+      if (options.persist !== false) localStorage.setItem(ACTIVE_VIEW_KEY, nextView);
+      document.querySelectorAll(".view").forEach(section => section.classList.toggle("active", section.id === nextView));
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === nextView));
       render();
     }
 
@@ -7046,7 +7054,7 @@
     });
 
     applyTheme(currentTheme);
-    render();
+    setView(savedActiveView(), { persist: false });
     applyPanelMode();
     loadSupabaseState(false);
   </script>
