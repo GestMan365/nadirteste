@@ -3490,6 +3490,7 @@
     let isLoadingRemote = false;
     let taxonomySupabaseAvailable = false;
     let hasPendingLocalSync = localStorage.getItem(PENDING_SYNC_KEY) === "1";
+    let hasSessionLocalChange = false;
     let deletedRecords = loadDeletedRecords();
     let syncTimer = null;
     if (localStorage.getItem(THEME_DEFAULT_KEY) !== "1") {
@@ -3536,6 +3537,7 @@
       deletedRecords[table][id] = { at: Date.now(), confirmed: false };
       saveDeletedRecords();
       hasPendingLocalSync = true;
+      hasSessionLocalChange = true;
       localStorage.setItem(PENDING_SYNC_KEY, "1");
     }
 
@@ -3599,6 +3601,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(state.profile || {}));
       hasPendingLocalSync = true;
+      hasSessionLocalChange = true;
       localStorage.setItem(PENDING_SYNC_KEY, "1");
       scheduleSupabaseSync();
     }
@@ -4246,13 +4249,14 @@
       });
     }
 
-    async function loadSupabaseState(showMessage = true, forceLocalUpload = false) {
+    async function loadSupabaseState(showMessage = true) {
       if (!SUPABASE_READY || isLoadingRemote) return false;
       const previousState = state;
-      const pendingBeforeLoad = hasPendingLocalSync;
+      const pendingBeforeLoad = hasSessionLocalChange && hasPendingLocalSync;
       let shouldPushLocal = false;
 
       try {
+        if (pendingBeforeLoad) await syncSupabaseNow(false);
         isLoadingRemote = true;
         const reads = [
           ["perfis", "perfis?select=*&order=created_at.asc"],
@@ -4294,13 +4298,14 @@
         const needsMobileDataMigration = taxonomySupabaseAvailable
           && hasLocalMobileSyncData(previousState)
           && !remoteHasMobileSyncData;
-        const shouldPreferLocal = pendingBeforeLoad || needsMobileDataMigration || forceLocalUpload;
+        const shouldPreferLocal = hasSessionLocalChange && hasPendingLocalSync;
 
-        if (!remoteHasBusinessData(remoteData) && hasBusinessData(previousState)) {
+        if (!remoteHasBusinessData(remoteData) && hasBusinessData(previousState) && shouldPreferLocal) {
           hasPendingLocalSync = true;
+          hasSessionLocalChange = true;
           localStorage.setItem(PENDING_SYNC_KEY, "1");
           shouldPushLocal = true;
-          if (showMessage) showToast("Supabase vazio. Enviando os dados deste aparelho sem apagar o cadastro local.");
+          if (showMessage) showToast("Supabase vazio. Enviando o cadastro atual sem apagar dados locais.");
           return false;
         }
 
@@ -4333,10 +4338,6 @@
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(state.profile || {}));
-        if (needsMobileDataMigration || forceLocalUpload) {
-          hasPendingLocalSync = true;
-          localStorage.setItem(PENDING_SYNC_KEY, "1");
-        }
         shouldPushLocal = shouldPreferLocal;
         render();
         if (showMessage) {
@@ -4353,9 +4354,9 @@
         isLoadingRemote = false;
         if (shouldPushLocal) {
           const uploaded = await syncSupabaseNow(false);
-          if (showMessage && forceLocalUpload) {
+          if (showMessage) {
             showToast(uploaded
-              ? "Dados deste computador enviados ao Supabase para os outros aparelhos."
+              ? "Cadastro enviado ao Supabase para alinhar os aparelhos."
               : "Alguns dados continuam pendentes. Verifique a conexao e tente novamente.");
           }
         }
@@ -4404,12 +4405,14 @@
           return false;
         }
         hasPendingLocalSync = false;
+        hasSessionLocalChange = false;
         localStorage.removeItem(PENDING_SYNC_KEY);
         if (showMessage) showToast("Dados enviados ao Supabase e disponíveis nos outros aparelhos.");
         return true;
       } catch (error) {
         console.error(error);
         hasPendingLocalSync = true;
+        hasSessionLocalChange = true;
         localStorage.setItem(PENDING_SYNC_KEY, "1");
         if (showMessage) showToast("Falha ao sincronizar Supabase. Os dados locais foram preservados.");
         return false;
@@ -6885,7 +6888,7 @@
       $("aiAnswer").textContent = answerSystemAi("resumo");
     });
     $("themeBtn").addEventListener("click", () => applyTheme(currentTheme === "light" ? "dark" : "light"));
-    $("syncBtn").addEventListener("click", () => loadSupabaseState(true, true));
+    $("syncBtn").addEventListener("click", () => loadSupabaseState(true));
 
     $("supplierForm").addEventListener("submit", async event => {
       event.preventDefault();
