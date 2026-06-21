@@ -4168,7 +4168,7 @@
       });
     }
 
-    async function loadSupabaseState(showMessage = true) {
+    async function loadSupabaseState(showMessage = true, forceLocalUpload = false) {
       if (!SUPABASE_READY || isLoadingRemote) return false;
       const previousState = state;
       const pendingBeforeLoad = hasPendingLocalSync;
@@ -4213,6 +4213,7 @@
         const needsMobileDataMigration = taxonomySupabaseAvailable
           && hasLocalMobileSyncData(previousState)
           && !remoteHasMobileSyncData;
+        const shouldPreferLocal = pendingBeforeLoad || needsMobileDataMigration || forceLocalUpload;
 
         if (!remoteHasBusinessData(remoteData) && hasBusinessData(previousState)) {
           hasPendingLocalSync = true;
@@ -4222,7 +4223,7 @@
           return false;
         }
 
-        state = mergeRemoteWithLocal(stateFromDb(remoteData), previousState, pendingBeforeLoad || needsMobileDataMigration);
+        state = mergeRemoteWithLocal(stateFromDb(remoteData), previousState, shouldPreferLocal);
         const failedStateProperties = {
           perfis: ["profile"],
           fornecedores: ["suppliers"],
@@ -4251,11 +4252,11 @@
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(state.profile || {}));
-        if (needsMobileDataMigration) {
+        if (needsMobileDataMigration || forceLocalUpload) {
           hasPendingLocalSync = true;
           localStorage.setItem(PENDING_SYNC_KEY, "1");
         }
-        shouldPushLocal = pendingBeforeLoad || needsMobileDataMigration;
+        shouldPushLocal = shouldPreferLocal;
         render();
         if (showMessage) {
           showToast(failures.length
@@ -4269,7 +4270,14 @@
         return false;
       } finally {
         isLoadingRemote = false;
-        if (shouldPushLocal) await syncSupabaseNow(false);
+        if (shouldPushLocal) {
+          const uploaded = await syncSupabaseNow(false);
+          if (showMessage && forceLocalUpload) {
+            showToast(uploaded
+              ? "Dados deste computador enviados ao Supabase para os outros aparelhos."
+              : "Alguns dados continuam pendentes. Verifique a conexao e tente novamente.");
+          }
+        }
       }
     }
 
@@ -6782,7 +6790,7 @@
       $("aiAnswer").textContent = answerSystemAi("resumo");
     });
     $("themeBtn").addEventListener("click", () => applyTheme(currentTheme === "light" ? "dark" : "light"));
-    $("syncBtn").addEventListener("click", () => loadSupabaseState(true));
+    $("syncBtn").addEventListener("click", () => loadSupabaseState(true, true));
 
     $("supplierForm").addEventListener("submit", async event => {
       event.preventDefault();
