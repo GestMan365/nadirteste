@@ -6227,6 +6227,56 @@
       openModal("Saldo por estoque", html, true);
     }
 
+    function openStockAdjustment(id) {
+      const spare = byId(state.spareParts, id);
+      if (!spare) return;
+      if (!state.stockLocations.length) { showToast("Crie um estoque antes de ajustar saldo."); return; }
+      const stockOptions = state.stockLocations.map(item => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join("");
+      openModal("Ajuste físico de saldo", `
+        <div class="side-box"><strong>${escapeHtml(spare.code)} - ${escapeHtml(spare.name)}</strong><span>Saldo atual: ${Number(spare.balance || 0)} ${escapeHtml(spare.unit || "UN")}</span><span>Informe o saldo contado fisicamente. O sistema criará uma movimentação de ajuste no Kardex.</span></div>
+        <div class="form">
+          <label>Estoque contado <select class="field" id="adjustStockId">${stockOptions}</select></label>
+          <label>Saldo contado <input class="field" id="adjustCountedBalance" type="number" min="0" step="0.01" value="${Number(spare.balance || 0)}"></label>
+          <div class="full toolbar"><button class="btn primary" type="button" onclick="confirmStockAdjustment('${id}')">Confirmar ajuste</button></div>
+        </div>
+      `);
+    }
+
+    async function confirmStockAdjustment(spareId) {
+      const spare = byId(state.spareParts, spareId);
+      if (!spare) return;
+      const stockId = $("adjustStockId")?.value || state.stockLocations[0]?.id || "";
+      const counted = Number($("adjustCountedBalance")?.value || 0);
+      if (!stockId) { showToast("Selecione um estoque para o ajuste."); return; }
+      if (Number.isNaN(counted) || counted < 0) { showToast("Informe um saldo contado válido."); return; }
+      const current = Number(spare.balance || 0);
+      const delta = roundStockValue(counted - current);
+      if (delta === 0) { showToast("Saldo contado igual ao saldo atual. Nenhum ajuste criado."); return; }
+      const payload = {
+        id: uid("stock_adjust"),
+        itemId: uid("stock_adjust_item"),
+        number: nextCode(state.inventoryMovements, "MOV"),
+        type: "Ajuste",
+        stockId,
+        spareId,
+        supplierId: spare.supplierId || "",
+        quantity: delta,
+        unitValue: 0,
+        owner: state.profile?.name || "Inventário físico",
+        status: "Concluída",
+        createdAt: Date.now(),
+        note: `Ajuste de inventário físico. Saldo anterior: ${current}. Saldo contado: ${counted}. Diferença: ${delta}.`
+      };
+      if (!applyStockBalanceChange(null, payload, stockMoveBalanceEffect)) return;
+      state.inventoryMovements = state.inventoryMovements.concat(payload);
+      saveState();
+      const saved = await saveSingleSupabase("movimentacoes_estoque", stockMoveDbRow(payload));
+      if (saved) await saveSingleSupabase("movimentacoes_estoque_itens", stockMoveItemDbRow(payload));
+      closeModal();
+      render();
+      showToast(saved ? "Ajuste registrado e saldo atualizado." : "Ajuste registrado localmente. Sincronização pendente.");
+    }
+
     function nextCode(list, prefix) {
       const next = list.reduce((max, item) => Math.max(max, orderNumberValue(item.number)), 0) + 1;
       return `${prefix}-${String(next).padStart(4, "0")}`;
@@ -6250,7 +6300,7 @@
 
       $("spareRows").innerHTML = state.spareParts.filter(item => filter(`${item.code} ${item.name} ${supplierName(item.supplierId)}`)).map(item => {
         const stockAlert = stockAlertStatus(item);
-        return `<tr><td>${item.code}</td><td>${item.name}</td><td>${supplierName(item.supplierId)}</td><td>${Number(item.balance || 0)} ${item.unit || "UN"}</td><td>${Number(item.minimum || 0)} ${item.unit || "UN"}</td><td>${tag(stockAlert.label)}</td><td class="actions"><button class="btn" onclick="openSpareLedger('${item.id}')">Kardex</button><button class="btn" onclick="editSpare('${item.id}')">Editar</button><button class="btn danger" onclick="deleteSpare('${item.id}')">Excluir</button></td></tr>`;
+        return `<tr><td>${item.code}</td><td>${item.name}</td><td>${supplierName(item.supplierId)}</td><td>${Number(item.balance || 0)} ${item.unit || "UN"}</td><td>${Number(item.minimum || 0)} ${item.unit || "UN"}</td><td>${tag(stockAlert.label)}</td><td class="actions"><button class="btn" onclick="openSpareLedger('${item.id}')">Kardex</button><button class="btn" onclick="openStockAdjustment('${item.id}')">Ajustar</button><button class="btn" onclick="editSpare('${item.id}')">Editar</button><button class="btn danger" onclick="deleteSpare('${item.id}')">Excluir</button></td></tr>`;
       }).join("") || `<tr><td colspan="7" class="empty">Nenhuma peça criada.</td></tr>`;
 
       $("stockMoveRows").innerHTML = state.inventoryMovements.filter(item => filter(`${item.number} ${item.type} ${stockName(item.stockId)} ${spareName(item.spareId)}`)).map(item => `
