@@ -7227,6 +7227,61 @@
       return texts[tabName] || "Secao da ordem de servico.";
     }
 
+    function orderMaterials(orderId) {
+      return state.materialRequests
+        .filter(item => item.orderId === orderId && statusKey(item.status) !== "cancelada")
+        .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+    }
+
+    function findSpareForOrderMaterial(query) {
+      const key = normalizeTextKey(query);
+      if (!key) return null;
+      const scored = state.spareParts
+        .filter(item => item.active !== false)
+        .map(item => {
+          const code = normalizeTextKey(item.code);
+          const supplierCode = normalizeTextKey(item.supplierCode);
+          const name = normalizeTextKey(item.name);
+          const combined = normalizeTextKey(`${item.code || ""} ${item.supplierCode || ""} ${item.name || ""}`);
+          let score = 0;
+          if (key === code || key === supplierCode) score = 100;
+          else if (key === name) score = 90;
+          else if (code.startsWith(key) || supplierCode.startsWith(key) || name.startsWith(key)) score = 70;
+          else if (combined.includes(key)) score = 50;
+          return { item, score };
+        })
+        .filter(result => result.score > 0)
+        .sort((a, b) => b.score - a.score || String(a.item.code || a.item.name).localeCompare(String(b.item.code || b.item.name), "pt-BR"));
+      return scored[0]?.item || null;
+    }
+
+    function orderMaterialTabContent(order = {}) {
+      const stockOptions = state.stockLocations
+        .filter(item => item.active !== false)
+        .map(item => `<option value="${item.id}">${escapeHtml(item.name)}</option>`)
+        .join("");
+      const spareOptions = state.spareParts
+        .filter(item => item.active !== false)
+        .map(item => `<option value="${escapeHtml(`${item.code || ""} - ${item.name || "Peça"}`)}"></option>`)
+        .join("");
+      const rows = orderMaterials(order.id).map(item => {
+        const spare = byId(state.spareParts, item.spareId) || {};
+        return `<tr><td>${escapeHtml(item.number || "-")}</td><td>${escapeHtml(spare.code || "-")} - ${escapeHtml(spare.name || "Peça")}</td><td>${formatQuantityForUnit(item.quantity, spare.unit)} ${escapeHtml(spare.unit || "UN")}</td><td>${escapeHtml(stockName(item.stockId))}</td><td>${item.createdAt ? formatDateTime(item.createdAt) : "-"}</td><td>${tag(item.status || "Atendida")}</td><td class="actions"><button class="btn danger" type="button" onclick="removeOrderMaterialConsumption('${item.id}', '${order.id}')">Remover</button></td></tr>`;
+      }).join("");
+      return `
+        <strong>MATERIAIS DE CONSUMO</strong>
+        <div class="side-box"><span>Digite o código ou nome da peça, informe a quantidade usada e o sistema dará baixa automaticamente no estoque.</span></div>
+        <form class="form" id="orderMaterialForm">
+          <label>Peça consumida <input class="field" id="orderMaterialSpareInput" list="orderMaterialSpareList" placeholder="Código ou nome da peça" autocomplete="off"><datalist id="orderMaterialSpareList">${spareOptions}</datalist></label>
+          <label>Quantidade <input class="field" id="orderMaterialQty" type="number" min="0" step="1" value="1"></label>
+          <label>Estoque de baixa <select class="field" id="orderMaterialStock">${stockOptions || `<option value="">Crie um estoque</option>`}</select></label>
+          <label>Observação <input class="field" id="orderMaterialNote" placeholder="Aplicação, local, observação"></label>
+          <div class="full toolbar"><button class="btn primary" type="submit">Adicionar e baixar estoque</button></div>
+        </form>
+        <div class="table-wrap"><table><thead><tr><th>Req.</th><th>Peça</th><th>Qtd.</th><th>Estoque</th><th>Data</th><th>Status</th><th>Ação</th></tr></thead><tbody>${rows || `<tr><td colspan="7" class="empty">Nenhum material consumido nesta O.S.</td></tr>`}</tbody></table></div>
+      `;
+    }
+
     function detailTabContent(tabName, order = {}) {
       const epis = order.epis || {};
       const checked = key => epis[key] ? "checked" : "";
@@ -7263,7 +7318,7 @@
       if (tabName === "Equipe") return `<strong>EQUIPE</strong><div class="form"><label>Executante principal <input class="field" value="${order.executor || ""}"></label><label>Quantidade <input class="field" value="${order.executors || 1}"></label></div>`;
       if (tabName === "Tarefas") return `<strong>TAREFAS</strong><div class="epi-list"><label class="epi-item"><input type="checkbox"> ANALISAR FALHA</label><label class="epi-item"><input type="checkbox"> EXECUTAR MANUTENCAO</label><label class="epi-item"><input type="checkbox"> TESTAR EQUIPAMENTO</label></div>`;
       if (tabName === "Fotos" || tabName === "Anexos" || tabName === "Documentos") return `<strong>${tabName.toUpperCase()}</strong><input class="field" type="file"><span class="muted">Arquivo fica vinculado visualmente nesta O.S.</span>`;
-      if (tabName === "Materiais") return `<strong>MATERIAIS</strong><div class="form"><label>Material <input class="field" placeholder="Ex: rolamento, oleo, sensor"></label><label>Quantidade <input class="field" placeholder="1"></label></div>`;
+      if (tabName === "Materiais") return orderMaterialTabContent(order);
       if (tabName === "Recursos") return `<strong>RECURSOS</strong><textarea class="field" placeholder="Ferramentas, bancada, apoio externo ou recursos necessarios"></textarea>`;
       return `<strong>${tabName.toUpperCase()}</strong><span>${detailTabText(tabName)}</span>`;
     }
@@ -7271,6 +7326,64 @@
     function updateOrderExtras(id, patch) {
       state.orders = state.orders.map(order => order.id === id ? { ...order, ...patch } : order);
       saveState();
+    }
+
+    function refreshOrderMaterialsTab(orderId) {
+      const panel = $("detailTabPanel");
+      if (!panel || !$("orderMaterialForm")) return;
+      const order = byId(state.orders, orderId) || {};
+      panel.innerHTML = detailTabContent("Materiais", order);
+      wireDetailTab("Materiais", orderId);
+    }
+
+    async function addOrderMaterialConsumption(orderId) {
+      const order = byId(state.orders, orderId);
+      if (!order) return;
+      const stockId = $("orderMaterialStock")?.value || "";
+      const spare = findSpareForOrderMaterial(value("orderMaterialSpareInput"));
+      const quantity = parseNumber($("orderMaterialQty")?.value, 0);
+      if (!stockId) { showToast("Selecione um estoque para baixar o material."); return; }
+      if (!spare) { showToast("Peça não encontrada. Digite código ou nome cadastrado."); return; }
+      if (quantity <= 0) { showToast("Informe a quantidade consumida."); return; }
+      if (!validateWholeQuantityForSpare(spare.id, quantity, "Quantidade consumida")) return;
+      const note = [value("orderMaterialNote"), `Consumo lançado na O.S ${order.number || ""}`].filter(Boolean).join(" | ");
+      const payload = {
+        id: uid("material_request"),
+        itemId: uid("material_request_item"),
+        number: nextCode(state.materialRequests, "REQ"),
+        stockId,
+        orderId,
+        spareId: spare.id,
+        quantity: normalizeQuantityForSpareId(spare.id, quantity),
+        requester: order.executor || order.requester || state.profile?.name || "O.S",
+        status: "Atendida",
+        note,
+        createdAt: Date.now()
+      };
+      if (!applyStockBalanceChange(null, payload, materialRequestBalanceEffect)) return;
+      state.materialRequests = state.materialRequests.concat(payload);
+      saveState();
+      const saved = await saveSingleSupabase("requisicoes_materiais", materialRequestDbRow(payload));
+      if (saved) await saveSingleSupabase("requisicoes_materiais_itens", materialRequestItemDbRow(payload));
+      render();
+      refreshOrderMaterialsTab(orderId);
+      showToast(saved ? "Material lançado e estoque baixado." : "Material lançado localmente. Sincronização pendente.");
+    }
+
+    async function removeOrderMaterialConsumption(requestId, orderId) {
+      if (!confirm("Remover este material da O.S e estornar o estoque?")) return;
+      const existing = byId(state.materialRequests, requestId);
+      if (!existing || !applyStockBalanceChange(existing, null, materialRequestBalanceEffect)) return;
+      await deleteSupabaseWhere("requisicoes_materiais_itens", `requisicao_id=eq.${encodeURIComponent(requestId)}`);
+      if (!await confirmRemoteDelete("requisicoes_materiais", requestId, "material da O.S")) {
+        applyStockBalanceChange(null, existing, materialRequestBalanceEffect);
+        return;
+      }
+      state.materialRequests = state.materialRequests.filter(item => item.id !== requestId);
+      saveState();
+      render();
+      refreshOrderMaterialsTab(orderId);
+      showToast("Material removido e estoque estornado.");
     }
 
     function wireDetailTab(tabName, orderId) {
@@ -7298,6 +7411,22 @@
             const order = byId(state.orders, orderId) || {};
             updateOrderExtras(orderId, { epis: { ...(order.epis || {}), [input.dataset.epi]: input.checked } });
           });
+        });
+      }
+      if (tabName === "Materiais") {
+        const form = $("orderMaterialForm");
+        const spareInput = $("orderMaterialSpareInput");
+        const qtyInput = $("orderMaterialQty");
+        const updateQtyStep = () => {
+          const spare = findSpareForOrderMaterial(spareInput?.value);
+          if (!spare || !qtyInput) return;
+          qtyInput.step = unitRequiresInteger(spare.unit || "UN") ? "1" : "0.01";
+          qtyInput.title = unitRequiresInteger(spare.unit || "UN") ? "Esta peça aceita somente quantidades inteiras." : "Esta peça aceita casas decimais.";
+        };
+        if (spareInput) spareInput.addEventListener("input", updateQtyStep);
+        if (form) form.addEventListener("submit", event => {
+          event.preventDefault();
+          addOrderMaterialConsumption(orderId);
         });
       }
     }
