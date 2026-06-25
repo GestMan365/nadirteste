@@ -383,13 +383,13 @@
       color: currentColor;
     }
 
-    .tab:hover {
+    body.theme-light .tab:hover, .tab:hover {
       transform: translateX(5px);
       border-color: rgba(255,138,76,.7);
       background: rgba(255,138,76,.14);
     }
 
-    .tab.active {
+    body.theme-light .tab.active, .tab.active {
       background: var(--orange);
       color: #061536;
       border-color: var(--orange);
@@ -2963,6 +2963,351 @@
         left: 0;
       }
     }
+
+    /* Template visual inspirado no H28 Parts; rotas e módulos originais preservados. */
+    :root {
+      --h28-blue: #2f4493;
+      --h28-blue-dark: #14285f;
+      --h28-orange: #f28b57;
+      --h28-page: #eef3fb;
+      --h28-line: #d8e0ec;
+      --h28-ink: #162033;
+      --topbar-h: 124px;
+    }
+
+    body {
+      overflow: auto;
+      font-family: Inter, Roboto, Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    body.theme-light {
+      background: linear-gradient(180deg, #edf3fb 0%, #f8faff 58%, #edf3fb 100%);
+      color: var(--h28-ink);
+    }
+
+    .topbar {
+      height: var(--topbar-h);
+      padding: 14px max(28px, calc((100vw - 1180px) / 2));
+      background: linear-gradient(100deg, var(--h28-blue-dark), var(--h28-blue));
+      border: 0;
+      border-bottom: 4px solid var(--h28-orange);
+      box-shadow: none;
+      overflow: visible;
+    }
+
+    .brand {
+      max-width: min(62vw, 620px);
+      padding: 4px 12px;
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(6, 20, 58, .22);
+      overflow: hidden;
+    }
+
+    .brand-logo-img {
+      height: 82px;
+      width: auto;
+      max-width: 100%;
+      animation: none;
+      object-fit: contain;
+    }
+
+    .top-actions {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 4px 0 8px;
+      scrollbar-width: thin;
+    }
+
+    .topbar .btn,
+    .topbar .admin-pill {
+      flex: 0 0 auto;
+      color: #fff;
+      background: rgba(255, 255, 255, .11);
+      border: 1px solid rgba(255, 255, 255, .32);
+      border-radius: 6px;
+      box-shadow: none;
+    }
+
+    .topbar .btn:hover,
+    .topbar .admin-pill:hover {
+      color: #fff;
+      background: rgba(242, 139, 87, .2);
+      border-color: var(--h28-orange);
+    }
+
+    .nav {
+      position: relative;
+      inset: auto;
+      width: 100%;
+      min-height: 0;
+      padding: 28px max(28px, calc((100vw - 1180px) / 2)) 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+      background: transparent;
+      border: 0;
+      z-index: 10;
+    }
+
+    .tabs {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+      overflow: visible;
+    }
+
+    .tab {
+      width: auto;
+      min-width: 0;
+      height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      color: var(--h28-blue);
+      background: #fff;
+      border: 1px solid var(--h28-line);
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 3px 10px rgba(22, 44, 96, .04);
+    }
+
+    .tab-icon { display: none; }
+
+    body.theme-light .tab:hover, .tab:hover {
+      color: var(--h28-blue);
+      background: #f8faff;
+      border-color: var(--h28-orange);
+      transform: translateY(-1px);
+    }
+
+    body.theme-light .tab.active, .tab.active {
+      color: #fff;
+      background: var(--h28-blue);
+      border-color: var(--h28-blue);
+      box-shadow: 0 6px 0 -2px var(--h28-orange);
+    }
+
+    .searchbar {
+      width: 100%;
+      height: 45px;
+      padding: 0 14px;
+      color: var(--h28-ink);
+      background: #fff;
+      border: 1px solid #c9d3e1;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: none;
+    }
+
+    .searchbar::placeholder { color: #78859a; }
+
+    .workspace {
+      width: min(1180px, calc(100% - 56px));
+      height: auto;
+      min-height: calc(100vh - var(--topbar-h) - 150px);
+      margin: 0 auto;
+      padding: 0 0 64px;
+      overflow: visible;
+    }
+
+    body.theme-light .panel,
+    body.theme-light .metric,
+    body.theme-light .side-box,
+    body.theme-light .modal {
+      color: var(--h28-ink);
+      background: #fff;
+      border-color: var(--h28-line);
+      box-shadow: 0 16px 34px rgba(25, 48, 94, .10);
+    }
+
+    body.theme-light .panel {
+      border-left: 4px solid var(--h28-orange);
+      border-radius: 8px;
+    }
+
+    body.theme-light .metric {
+      min-height: 108px;
+      padding: 16px;
+      background: #fff !important;
+      border-left: 4px solid var(--h28-orange);
+      border-radius: 8px;
+    }
+
+    body.theme-light .metric::after {
+      width: 8px;
+      height: 8px;
+      background: var(--h28-orange);
+      box-shadow: none;
+      animation: none;
+    }
+
+    body.theme-light .metric span,
+    body.theme-light .metric small { color: #64748b; }
+    body.theme-light .metric strong { color: var(--h28-blue); }
+
+    body.theme-light .panel-head {
+      min-height: 56px;
+      padding: 12px 16px;
+      border-bottom-color: #e4e9f1;
+    }
+
+    body.theme-light .panel-title {
+      color: var(--h28-blue);
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    body.theme-light .btn {
+      min-height: 36px;
+      height: auto;
+      padding: 8px 13px;
+      color: var(--h28-blue);
+      background: #fff;
+      border: 1px solid var(--h28-line);
+      border-radius: 6px;
+      font-weight: 800;
+      box-shadow: none;
+    }
+
+    body.theme-light .btn:hover {
+      color: var(--h28-blue);
+      border-color: var(--h28-orange);
+      box-shadow: 0 5px 0 -2px rgba(242, 139, 87, .75);
+      transform: translateY(-1px);
+    }
+
+    body.theme-light .btn.primary {
+      color: #fff;
+      background: var(--h28-blue);
+      border-color: var(--h28-blue);
+      box-shadow: 0 6px 0 -2px var(--h28-orange);
+    }
+
+    body.theme-light .btn.danger {
+      color: #fff;
+      background: #b42335;
+      border-color: #b42335;
+    }
+
+    body.theme-light .field,
+    body.theme-light input,
+    body.theme-light select,
+    body.theme-light textarea {
+      color: var(--h28-ink);
+      background: #fff;
+      border-color: #c9d3e1;
+      border-radius: 6px;
+    }
+
+    body.theme-light .field:focus,
+    body.theme-light input:focus,
+    body.theme-light select:focus,
+    body.theme-light textarea:focus {
+      border-color: var(--h28-blue);
+      box-shadow: 0 0 0 3px rgba(47, 68, 147, .12);
+      outline: none;
+    }
+
+    body.theme-light .form label {
+      color: var(--h28-ink);
+      font-weight: 800;
+    }
+
+    body.theme-light table { background: #fff; }
+    body.theme-light th {
+      color: var(--h28-blue-dark);
+      background: #f3f6fb;
+      border-bottom-color: var(--h28-line);
+    }
+    body.theme-light td { border-bottom-color: #edf1f6; }
+
+    body.theme-light .modal-backdrop { background: rgba(20, 40, 95, .52); }
+    body.theme-light .modal { border-left: 4px solid var(--h28-orange); }
+    body.theme-light .modal-head {
+      color: var(--h28-blue);
+      border-bottom-color: var(--h28-line);
+    }
+
+    body.theme-light .tag { border-radius: 999px; }
+
+    @media (max-width: 760px) {
+      :root { --topbar-h: auto; }
+
+      .topbar {
+        height: auto;
+        min-height: 88px;
+        padding: 10px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .brand {
+        width: 100%;
+        max-width: 100%;
+        padding: 3px 8px;
+        justify-content: center;
+      }
+
+      .brand-logo-img {
+        width: min(100%, 520px);
+        height: auto;
+        max-height: 60px;
+      }
+
+      .top-actions {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 7px;
+      }
+
+      .topbar .btn,
+      .topbar .admin-pill { min-height: 34px; }
+
+      .nav {
+        padding: 18px 10px 14px;
+        gap: 12px;
+      }
+
+      .tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0 0 8px;
+        scroll-snap-type: x proximity;
+        scrollbar-width: thin;
+      }
+
+      .tab {
+        flex: 0 0 auto;
+        height: 44px;
+        padding: 0 15px;
+        scroll-snap-align: start;
+      }
+
+      .workspace {
+        width: calc(100% - 20px);
+        min-height: 0;
+        margin: 0 auto;
+        padding: 0 0 48px;
+      }
+
+      body.theme-light .panel,
+      body.theme-light .metric { border-left-width: 3px; }
+
+      body.theme-light .panel-head { padding: 11px 12px; }
+      body.theme-light .panel-title { font-size: 15px; }
+      body.theme-light .btn { min-height: 38px; }
+      body.theme-light .form { grid-template-columns: 1fr; }
+      body.theme-light .form .full { grid-column: 1; }
+    }
 </style>
 </head>
 <body class="theme-light">
@@ -2995,7 +3340,7 @@
       <button class="tab" data-view="orders"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M7 3h10l3 3v15H4V3h3z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span><span>ORDENS</span></button>
       <button class="tab" data-view="calendar"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span><span>CALENDÁRIO</span></button>
       <button class="tab" data-view="activeOrders"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><circle cx="17" cy="16" r="2"/></svg></span><span>PAINEL O.S</span></button>
-      <button class="tab" data-view="reports"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h17"/><path d="M8 16v-5M13 16V8M18 16v-9"/></svg></span><span>RELATORIOS</span></button>
+      <button class="tab" data-view="reports"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h17"/><path d="M8 16v-5M13 16V8M18 16v-9"/></svg></span><span>RELATÓRIOS</span></button>
       <button class="tab" data-view="checklists"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M7 12l3 3 7-7"/></svg></span><span>CHECKLISTS</span></button>
     </div>
     <input class="searchbar" id="globalSearch" placeholder="Pesquisar equipamento, região, local, tag ou O.S">
