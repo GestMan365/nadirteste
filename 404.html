@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GestMan365</title>
+</head>
+<body>
+  <script>
+    (function () {
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const slug = parts[parts.length - 1] || "";
+      const baseParts = parts.slice(0, -1);
+      const base = "/" + (baseParts.length ? baseParts.join("/") + "/" : "");
+      if (!slug || slug.includes(".")) {
+        window.location.replace(base || "/");
+        return;
+      }
+      fetch(`${base}index.html`, { cache: "no-store" })
+        .then(response => response.text())
+        .then(html => {
+          document.open();
+          document.write(html);
+          document.close();
+        })
+        .catch(() => {
+          window.location.replace(`${base}?empresa=${encodeURIComponent(slug)}`);
+        });
+    })();
+  </script>
+</body>
+</html>

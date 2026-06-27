@@ -430,11 +430,14 @@
 
     .auth-screen {
       min-height: 100vh;
-      padding: 24px;
+      padding: 24px 12.5vw 24px 24px;
       display: none;
       align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #0c3448 0%, #222c63 44%, #642687 100%);
+      justify-content: flex-end;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255, 138, 76, .16), transparent 25%),
+        radial-gradient(circle at 86% 8%, rgba(255, 255, 255, .08), transparent 24%),
+        linear-gradient(135deg, var(--blue-900) 0%, var(--blue-800) 54%, var(--blue-700) 100%);
     }
 
     body.auth-required .auth-screen { display: flex; }
@@ -467,6 +470,40 @@
     }
 
     .auth-main .muted { display: none; }
+
+    .auth-card input,
+    .auth-card button {
+      text-transform: none;
+    }
+
+    .auth-company-badge {
+      width: 144px;
+      height: 74px;
+      margin: 54px auto 56px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--orange), #123f8d);
+      box-shadow: 0 10px 24px rgba(18, 63, 141, .22);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    body.auth-link-company .auth-company-badge {
+      display: flex;
+    }
+
+    body.auth-link-company .auth-main h2 {
+      margin-bottom: 38px;
+    }
+
+    body.auth-link-company .auth-domain-field {
+      display: none;
+    }
 
     .auth-login-form {
       width: 100%;
@@ -640,6 +677,13 @@
       font-size: 11px;
       font-weight: 1000;
       line-height: 1;
+    }
+
+    @media (max-width: 760px) {
+      .auth-screen {
+        padding: 24px;
+        justify-content: center;
+      }
     }
 
     .tenant-pill {
@@ -3850,13 +3894,14 @@
   <div class="auth-screen" id="authScreen">
     <div class="auth-card">
       <div class="auth-main">
+        <div class="auth-company-badge" id="authCompanyBadge"></div>
         <h2 id="authTitle">Bem Vindo</h2>
         <p class="muted" id="authSubtitle"></p>
 
         <form class="auth-form auth-login-form" id="authLoginForm">
-          <label>Domínio <input class="field" id="authCompanyLogin" autocomplete="organization"></label>
-          <label>Usuário <input class="field" id="authEmail" type="email" autocomplete="username"></label>
-          <label>Senha <input class="field" id="authPassword" type="password" autocomplete="current-password"></label>
+          <label class="auth-domain-field">Domínio <input class="field" id="authCompanyLogin" autocomplete="organization" autocapitalize="none" spellcheck="false"></label>
+          <label>Usuário <input class="field" id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
+          <label>Senha <input class="field" id="authPassword" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false"></label>
           <label class="auth-remember"><input id="rememberLogin" type="checkbox"><span class="auth-switch"></span><span>Continuar conectado</span></label>
           <div class="auth-actions"><button class="btn primary auth-submit" type="submit">Continuar</button></div>
           <a class="auth-forgot" id="forgotPasswordLink" href="#">esqueci minha senha 🔒</a>
@@ -4572,6 +4617,10 @@
       return String(value || "").trim().toLowerCase();
     }
 
+    function normalizeAuthPassword(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
     function slugText(value) {
       return String(value || "")
         .normalize("NFD")
@@ -4594,6 +4643,25 @@
     function companyLoginFromName(name) {
       const suffix = slugText(name);
       return suffix ? `${GESTMAN_LOGIN_PREFIX}${suffix}` : "";
+    }
+
+    function companyLoginFromRoute() {
+      const params = new URLSearchParams(window.location.search || "");
+      const queryCompany = params.get("empresa") || params.get("dominio") || params.get("company") || "";
+      if (queryCompany) return normalizeCompanyLogin(queryCompany);
+      const hash = String(window.location.hash || "").replace(/^#\/?/, "");
+      if (hash && !hash.includes("=")) return normalizeCompanyLogin(hash.split("/")[0]);
+      const parts = String(window.location.pathname || "").split("/").filter(Boolean);
+      const last = (parts[parts.length - 1] || "").trim();
+      if (!last || last.toLowerCase() === "index.html") return "";
+      if (last.includes(".") && !last.toLowerCase().startsWith("gestman.")) return "";
+      if (["h28parts", "gestman365-sync", "work"].includes(last.toLowerCase())) return "";
+      return normalizeCompanyLogin(last);
+    }
+
+    function companyDisplayNameFromLogin(login) {
+      const suffix = normalizeCompanyLogin(login).slice(GESTMAN_LOGIN_PREFIX.length);
+      return suffix ? suffix.replace(/[-_]+/g, " ").toUpperCase() : "NADIR";
     }
 
     function companyIsApproved(company) {
@@ -5558,7 +5626,16 @@
       $("authSetupForm").classList.add("is-hidden");
       $("authTitle").textContent = "Bem Vindo";
       $("authSubtitle").textContent = "";
-      applyRememberedLogin();
+      const routeLogin = companyLoginFromRoute();
+      document.body.classList.toggle("auth-link-company", Boolean(routeLogin));
+      if ($("authCompanyBadge")) $("authCompanyBadge").textContent = routeLogin ? companyDisplayNameFromLogin(routeLogin) : "";
+      if (routeLogin && $("authCompanyLogin")) {
+        $("authCompanyLogin").value = routeLogin;
+        $("authCompanyLogin").dataset.routeLogin = "1";
+      } else {
+        delete $("authCompanyLogin")?.dataset.routeLogin;
+        applyRememberedLogin();
+      }
       updateSetupCompanyLogin();
     }
 
@@ -5587,11 +5664,12 @@
     async function loginTenantUser(companyLogin, email, password) {
       const login = normalizeCompanyLogin(companyLogin);
       const normalizedEmail = normalizeEmail(email);
-      if (!login || !normalizedEmail || !password) {
+      const normalizedPassword = normalizeAuthPassword(password);
+      if (!login || !normalizedEmail || !normalizedPassword) {
         showToast("Informe domínio, usuário e senha.");
         return false;
       }
-      await loadApprovalCompanyFromSupabase(login, normalizedEmail, password);
+      await loadApprovalCompanyFromSupabase(login, normalizedEmail, normalizedPassword);
       authStore = loadAuthStore();
       const company = authStore.companies.find(item => item.login === login && item.status !== "Bloqueada");
       if (company && !companyIsApproved(company)) {
@@ -5601,7 +5679,7 @@
       const user = authStore.users.find(item =>
         item.companyId === company?.id &&
         normalizeEmail(item.email) === normalizedEmail &&
-        item.password === String(password || "") &&
+        normalizeAuthPassword(item.password) === normalizedPassword &&
         item.active !== false
       );
       if (!company || !user) {
@@ -5625,7 +5703,7 @@
       const companyLogin = normalizeCompanyLogin($("setupCompanyLogin").value || companyLoginFromName(companyName));
       const adminName = $("setupAdminName").value.trim();
       const adminEmail = normalizeEmail($("setupAdminEmail").value);
-      const adminPassword = $("setupAdminPassword").value;
+      const adminPassword = normalizeAuthPassword($("setupAdminPassword").value);
       if (!companyName || !companyLogin || !adminName || !adminEmail || !adminPassword) {
         showToast("Preencha empresa, administrador, email e senha.");
         return false;
@@ -5650,7 +5728,7 @@
         companyId: company.id,
         name: adminName,
         email: adminEmail,
-        password: String(adminPassword),
+        password: adminPassword,
         role: "admin",
         active: true,
         permissions: allPermissions(true),
@@ -10808,6 +10886,12 @@
     if ($("setupCompanyName")) $("setupCompanyName").addEventListener("input", updateSetupCompanyLogin);
     if ($("authCompanyLogin")) $("authCompanyLogin").addEventListener("blur", () => {
       $("authCompanyLogin").value = normalizeCompanyLogin($("authCompanyLogin").value);
+    });
+    if ($("authEmail")) $("authEmail").addEventListener("blur", () => {
+      $("authEmail").value = normalizeEmail($("authEmail").value);
+    });
+    if ($("authPassword")) $("authPassword").addEventListener("blur", () => {
+      $("authPassword").value = normalizeAuthPassword($("authPassword").value);
     });
     if ($("forgotPasswordLink")) $("forgotPasswordLink").addEventListener("click", event => {
       event.preventDefault();
