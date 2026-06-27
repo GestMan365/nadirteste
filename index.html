@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
@@ -4029,7 +4029,7 @@
     }
 </style>
 </head>
-<body class="theme-light">
+<body class="theme-light auth-required">
   <div class="auth-screen" id="authScreen">
     <div class="auth-brand-strip"><div class="auth-brand-logo"><span class="auth-brand-mark"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 16 L30 5"/><path d="M18 36 L40 25"/></svg></span><span>GESTMAN365</span></div></div>
     <div class="auth-card">
@@ -4074,8 +4074,6 @@
       <span class="tenant-pill" id="companyName">Empresa</span>
       <button class="admin-pill" id="profileBtn" type="button"><span class="admin-avatar" id="profileAvatar">AD</span><span id="profileName">Administrador</span></button>
       <button class="btn theme-toggle" id="themeBtn" type="button" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro"></button>
-      <button class="btn" id="syncBtn">Sincronizar banco</button>
-      <button class="btn" id="exportBtn">Exportar</button>
       <button class="btn" id="logoutBtn" type="button">Sair</button>
     </div>
   </header>
@@ -4104,8 +4102,6 @@
       <button class="tab" data-view="reports"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h17"/><path d="M8 16v-5M13 16V8M18 16v-9"/></svg></span><span>RELATÓRIOS</span></button>
       <button class="tab" data-view="assistant"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><rect x="5" y="6" width="14" height="12" rx="3"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4"/><circle cx="10" cy="12" r="1"/><circle cx="14" cy="12" r="1"/><path d="M9 15h6"/></svg></span><span>IA GESTMAN365</span></button>
       <button class="tab" data-view="checklists"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M7 12l3 3 7-7"/></svg></span><span>CHECKLISTS</span></button>
-      <button class="tab" data-view="users"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>USUÁRIOS</span></button>
-      <button class="tab" data-view="apiDocs"><span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="M18 15l2 2-2 2"/></svg></span><span>API SGMAN</span></button>
     </div>
     <input class="searchbar" id="globalSearch" placeholder="Pesquisar equipamento, região, local, tag ou O.S">
   </nav>
@@ -4533,56 +4529,7 @@
         <div class="table-wrap"><table><thead><tr><th>ID</th><th>Equipamento</th><th>Nome</th><th>Último preenchimento</th><th>Ações</th></tr></thead><tbody id="checklistRows"></tbody></table></div>
       </div>
     </section>
-
-    <section class="view" id="users">
-      <div class="grid two-col">
-        <div class="panel">
-          <div class="panel-head">
-            <div>
-              <div class="panel-title">Usuários da empresa</div>
-              <small class="muted">Somente administradores criam usuários e definem permissões por módulo.</small>
-            </div>
-          </div>
-          <form class="form" id="tenantUserForm">
-            <input type="hidden" id="tenantUserId">
-            <label>Nome <input class="field" id="tenantUserName" required placeholder="Nome do usuário"></label>
-            <label>Email <input class="field" id="tenantUserEmail" required type="email" placeholder="usuario@empresa.com"></label>
-            <label>Senha <input class="field" id="tenantUserPassword" type="password" placeholder="Senha inicial ou nova senha"></label>
-            <label>Perfil <select class="field" id="tenantUserRole"><option value="user">Usuário</option><option value="admin">Administrador</option></select></label>
-            <label>Status <select class="field" id="tenantUserActive"><option value="true">Ativo</option><option value="false">Bloqueado</option></select></label>
-            <div class="full">
-              <label>Permissões de acesso</label>
-              <div class="permission-grid" id="tenantPermissionGrid"></div>
-            </div>
-            <div class="full toolbar">
-              <button class="btn primary" type="submit">Salvar usuário</button>
-              <button class="btn" type="button" id="resetTenantUserForm">Limpar</button>
-            </div>
-          </form>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><div class="panel-title">Contas cadastradas</div></div>
-          <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Email</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tenantUserRows"></tbody></table></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="view" id="apiDocs">
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <div class="panel-title">Árvore de comandos API SGMAN</div>
-            <small class="muted">Copiada da documentação Postman informada. Use para conferir os módulos e rotas faltantes.</small>
-          </div>
-          <button class="btn" type="button" id="copyApiTreeBtn">Copiar árvore</button>
-        </div>
-        <div class="form">
-          <label class="full">Pesquisar módulo, comando ou rota <input class="field" id="apiTreeSearch" placeholder="Ex: parada, listar, /os/criar"></label>
-        </div>
-        <div id="apiTree" class="api-tree"></div>
-      </div>
-    </section>
-  </main>
+</main>
 
   <div class="context-menu" id="machineMenu">
     <button class="menu-item" data-machine-action="checklists"><span><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M7 12l3 3 7-7"/></svg></span><span>CHECKLISTS</span></button>
@@ -4644,8 +4591,6 @@
       { key: "reports", label: "Relatórios", views: ["reports"] },
       { key: "assistant", label: "IA GestMan365", views: ["assistant"] },
       { key: "checklists", label: "Checklists", views: ["checklists"] },
-      { key: "apiDocs", label: "API SGMAN", views: ["apiDocs"] },
-      { key: "users", label: "Usuários e permissões", views: ["users"], adminOnly: true }
     ];
     const MODULE_ACTION_PERMISSION = Object.fromEntries(PERMISSION_MODULES.flatMap(module => (module.actions || []).map(action => [action, module.key])));
     const VIEW_PERMISSION = Object.fromEntries(PERMISSION_MODULES.flatMap(module => module.views.map(view => [view, module.key])));
@@ -5922,14 +5867,6 @@
         const view = button.dataset.viewButton;
         button.classList.toggle("is-permission-hidden", Boolean(currentAccount) && !canAccessView(view));
       });
-      if ($("syncBtn")) {
-        $("syncBtn").style.display = isAdminUser() ? "" : "none";
-        $("syncBtn").textContent = tenantRemoteSyncEnabled() ? "Sincronizar banco" : "Nuvem off";
-        $("syncBtn").title = tenantRemoteSyncEnabled()
-          ? "Sincronizar dados desta empresa"
-          : "Nuvem desativada para evitar misturar empresas no banco antigo";
-      }
-      if ($("exportBtn")) $("exportBtn").style.display = isAdminUser() ? "" : "none";
     }
 
     function renderPermissionGrid(selected = {}, role = "user") {
@@ -9549,19 +9486,41 @@
     function openProfileModal() {
       const profile = state.profile || {};
       const user = currentAccount?.user || {};
+      const userPhoto = user.photo || profile.photo || "";
       openModal("Perfil do usuário", `
         <form class="form" id="profileForm">
           <label>Empresa <input class="field" value="${escapeHtml(currentAccount?.company?.name || "")}" disabled></label>
           <label>Perfil <input class="field" value="${isAdminUser() ? "Administrador" : "Usuário"}" disabled></label>
           <label>Nome <input class="field" id="profileEditName" value="${escapeHtml(user.name || profile.name || "Usuário")}"></label>
           <label>Email <input class="field" id="profileEditEmail" value="${escapeHtml(user.email || profile.email || "")}" placeholder="email@empresa.com"></label>
-          <label>Foto por URL <input class="field" id="profileEditPhoto" value="${escapeHtml(user.photo || profile.photo || "")}" placeholder="https://..."></label>
+          <input type="hidden" id="profileEditPhoto" value="${escapeHtml(userPhoto)}">
           <label class="full">Enviar foto <input class="field" id="profilePhotoFile" type="file" accept="image/*"></label>
-          <div class="full side-box"><strong>Prévia</strong><span id="profilePreview">${(user.photo || profile.photo) ? `<img src="${user.photo || profile.photo}" style="width:72px;height:72px;border-radius:999px;object-fit:cover">` : "Sem foto cadastrada"}</span></div>
+          <div class="full side-box"><strong>Prévia</strong><span id="profilePreview">${userPhoto ? `<img src="${userPhoto}" style="width:72px;height:72px;border-radius:999px;object-fit:cover">` : "Sem foto cadastrada"}</span></div>
           <div class="full toolbar"><button class="btn primary" type="submit">Salvar perfil</button></div>
         </form>
-      `);
-      $("profilePhotoFile").addEventListener("change", event => {
+        ${isAdminUser() ? `
+          <div class="panel profile-admin-users">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Usuários da empresa</div>
+                <small class="muted">Somente o administrador visualiza e cria contas de acesso.</small>
+              </div>
+            </div>
+            <form class="form" id="tenantUserForm">
+              <input type="hidden" id="tenantUserId">
+              <label>Nome <input class="field" id="tenantUserName" required placeholder="Nome do usuário"></label>
+              <label>Email <input class="field" id="tenantUserEmail" required type="email" placeholder="usuario@empresa.com"></label>
+              <label>Senha <input class="field" id="tenantUserPassword" type="password" placeholder="Senha inicial ou nova senha"></label>
+              <label>Perfil <select class="field" id="tenantUserRole"><option value="user">Usuário</option><option value="admin">Administrador</option></select></label>
+              <label>Status <select class="field" id="tenantUserActive"><option value="true">Ativo</option><option value="false">Bloqueado</option></select></label>
+              <div class="full"><label>Permissões de acesso</label><div class="permission-grid" id="tenantPermissionGrid"></div></div>
+              <div class="full toolbar"><button class="btn primary" type="submit">Salvar usuário</button><button class="btn" type="button" id="resetTenantUserForm">Limpar</button></div>
+            </form>
+            <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Email</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tenantUserRows"></tbody></table></div>
+          </div>
+        ` : ""}
+      `, true);
+      if ($("profilePhotoFile")) $("profilePhotoFile").addEventListener("change", event => {
         const file = event.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
@@ -9580,18 +9539,20 @@
         authStore.users = authStore.users.map(item => item.id === currentUserId ? { ...item, name: nextName, email: nextEmail, photo: nextPhoto } : item);
         saveAuthStore(authStore);
         currentAccount = resolveCurrentAccount(authStore);
-        state.profile = {
-          name: nextName,
-          role: isAdminUser() ? "Administrador" : "Usuário",
-          email: nextEmail,
-          photo: nextPhoto
-        };
+        state.profile = { name: nextName, role: isAdminUser() ? "Administrador" : "Usuário", email: nextEmail, photo: nextPhoto };
         saveState();
         await syncSupabaseNow(false);
         closeModal();
         render();
         showToast("Perfil atualizado.");
       });
+      if (isAdminUser() && $("tenantUserForm")) {
+        resetTenantUserForm();
+        renderUsers();
+        $("tenantUserForm").addEventListener("submit", saveTenantUserFromForm);
+        $("resetTenantUserForm").addEventListener("click", resetTenantUserForm);
+        $("tenantUserRole").addEventListener("change", () => renderPermissionGrid(selectedPermissionPayload(), $("tenantUserRole").value));
+      }
     }
 
     function formatDateTime(value) {
@@ -11084,8 +11045,6 @@
       }
     }));
     $("globalSearch").addEventListener("input", render);
-    if ($("apiTreeSearch")) $("apiTreeSearch").addEventListener("input", renderApiTree);
-    if ($("copyApiTreeBtn")) $("copyApiTreeBtn").addEventListener("click", () => copyPlainText(apiTreeText()));
     document.addEventListener("click", event => {
       if (!event.target.closest("#machineMenu") && !event.target.closest("[data-machine]")) closeMachineMenu();
       if (!event.target.closest("#locationMenu") && !event.target.closest("[data-location]")) closeLocationMenu();
@@ -11098,9 +11057,9 @@
     });
     $("profileBtn").addEventListener("click", openProfileModal);
     $("logoutBtn").addEventListener("click", logoutTenantUser);
-    $("tenantUserForm").addEventListener("submit", saveTenantUserFromForm);
-    $("resetTenantUserForm").addEventListener("click", resetTenantUserForm);
-    $("tenantUserRole").addEventListener("change", () => renderPermissionGrid(selectedPermissionPayload(), $("tenantUserRole").value));
+    if ($("tenantUserForm")) $("tenantUserForm").addEventListener("submit", saveTenantUserFromForm);
+    if ($("resetTenantUserForm")) $("resetTenantUserForm").addEventListener("click", resetTenantUserForm);
+    if ($("tenantUserRole")) $("tenantUserRole").addEventListener("change", () => renderPermissionGrid(selectedPermissionPayload(), $("tenantUserRole").value));
     $("dashboardConfigBtn").addEventListener("click", openDashboardConfig);
     $("purchaseListBtn").addEventListener("click", openPurchaseList);
     $("stockTurnoverBtn").addEventListener("click", openStockTurnoverModal);
@@ -11152,7 +11111,6 @@
       $("aiAnswer").textContent = ptBrText(answerSystemAi("resumo"));
     });
     $("themeBtn").addEventListener("click", () => applyTheme(currentTheme === "light" ? "dark" : "light"));
-    $("syncBtn").addEventListener("click", () => loadSupabaseState(true));
 
     $("supplierForm").addEventListener("submit", async event => {
       event.preventDefault();
@@ -11327,15 +11285,6 @@
     $("resetStockMoveForm").addEventListener("click", resetStockMoveForm);
     $("resetMaterialRequestForm").addEventListener("click", resetMaterialRequestForm);
     $("resetStockTransferForm").addEventListener("click", resetStockTransferForm);
-    $("exportBtn").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "gestman365-dados.json";
-      link.click();
-      URL.revokeObjectURL(url);
-    });
 
     setInterval(() => {
       if (!currentAccount) return;
