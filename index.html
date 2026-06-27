@@ -452,9 +452,35 @@
     body.auth-loading .topbar,
     body.auth-loading .nav,
     body.auth-loading .workspace,
-    body.auth-loading .context-menu,
-    body.auth-loading .auth-screen {
+    body.auth-loading .context-menu {
       display: none !important;
+    }
+
+    body.auth-loading .auth-screen {
+      display: flex !important;
+    }
+
+    body.auth-loading .auth-card {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    body.auth-loading .auth-screen::before {
+      content: "GESTMAN365";
+      position: absolute;
+      z-index: 3;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 14px 22px 18px;
+      border-radius: 10px;
+      color: #fff;
+      background: rgba(7, 20, 48, .76);
+      border-bottom: 4px solid var(--orange);
+      box-shadow: 0 16px 32px rgba(0,0,0,.25);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .02em;
     }
 
     .auth-screen::after {
@@ -4180,7 +4206,18 @@
     }
 </style>
 </head>
-<body class="theme-light auth-loading">
+<body class="theme-light auth-required auth-loading">
+  <script>
+    window.__gestmanReleaseAuthLoading = function () {
+      if (!document.body) return;
+      if (document.body.classList.contains("auth-loading")) {
+        document.body.classList.remove("auth-loading");
+        document.body.classList.add("auth-required");
+      }
+    };
+    window.__gestmanAuthFallback = setTimeout(window.__gestmanReleaseAuthLoading, 1200);
+    window.addEventListener("error", window.__gestmanReleaseAuthLoading, { once: true });
+  </script>
   <div class="auth-screen" id="authScreen">
     <div class="auth-brand-strip"><div class="auth-brand-logo"><span class="auth-brand-mark"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 16 L30 5"/><path d="M18 36 L40 25"/></svg></span><span>GESTMAN365</span></div></div>
     <div class="auth-card">
